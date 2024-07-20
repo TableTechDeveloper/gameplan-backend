@@ -21,4 +21,17 @@ if (databaseURL) {
 const userRoute = require('./controllers/UserRouter')
 app.use('/user', userRoute)
 
+app.get("*", (request, response, next) => {
+    response.status(404).json({
+        message: "404, Page not found!"
+    })
+})
+
+app.use((error, request, response, next) => {
+    response.status(error.status || 500).json({
+        message: error.message || "An error has occurred",
+        errors: error.errors || []
+    });
+});
+
 module.exports = app;
