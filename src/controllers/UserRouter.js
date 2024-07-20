@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { User } = require('../models/models');
-const { createJWT } = require('../utils/authHelpers');
+const { createJWT, checkPassword } = require('../utils/authHelpers');
 
-router.post('/register', async (request, response) => {
+router.post('/register', async (request, response, next) => {
     const { email, password, username, location } = request.body;
 
     const newUser = new User({
@@ -39,5 +39,33 @@ router.post('/register', async (request, response) => {
         }
     }
 });
+
+router.post('/login', async (request, response, next) => {
+    let newJwt = "";
+
+    if (!request.body.password || !request.body.username) {
+        return next(
+            new Error("Missing login details")
+        )
+    }
+
+    let foundUser = await User.findOne({ username: request.body.username }).exec();
+
+    console.log(request.body, foundUser);
+
+    let isPasswordCorrect = checkPassword(request.body.password, foundUser.password);
+    if (isPasswordCorrect) {
+        newJwt = createJWT(foundUser._id);
+        response.json({
+            jwt: newJwt
+        })
+        console.log(`${foundUser.username} has logged in!`)
+    } else {
+        return next(
+            new Error("Incorrect Password")
+        )
+    }
+
+})
 
 module.exports = router;
