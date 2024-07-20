@@ -1,9 +1,9 @@
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 dotenv.config();
 
 const config = {
-    host: process.env.HOST || 'localhost',
-    port: process.env.PORT || 3000,
+    HOST: process.env.HOST || 'localhost',
+    PORT: process.env.PORT || 3000,
     databaseURL: (() => {
         switch (process.env.NODE_ENV.toLowerCase()) {
             case 'test':
