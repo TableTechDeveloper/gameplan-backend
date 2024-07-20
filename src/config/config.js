@@ -16,7 +16,8 @@ const config = {
                 console.error('Incorrect JS environment specified, database will not be connected');
                 return '';
         }
-    })()
+    })(),
+    jwtKey: process.env.JWT_KEY
 };
 
 module.exports = config;
