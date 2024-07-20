@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const { host, port, databaseURL } = require('./config/config');
+const { databaseURL } = require('./config/config');
 
 const app = express();
 
@@ -18,8 +18,7 @@ if (databaseURL) {
     console.error('No valid database URL provided');
 }
 
-app.listen(port, host, () => {
-    console.log(`Server is running on http://${host}:${port}`);
-});
+const userRoute = require('./controllers/UserRouter')
+app.use('/user', userRoute)
 
 module.exports = app;
