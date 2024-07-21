@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
+// DRY coding for repeatable use of env variables
 const config = {
     HOST: process.env.HOST || 'localhost',
     PORT: process.env.PORT || 3000,

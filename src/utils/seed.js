@@ -1,6 +1,6 @@
 // seed.js
-const fetchAndParseXML = require('./boardgamegeekApiParse');
-const { Game, User } = require('../models/models');
+const { fetchBoardGameData } = require('./boardgamegeekApiParse');
+const { Game, User, Event } = require('../models/models');
 const { databaseConnector, databaseDisconnector, databaseClear } = require('./database');
 const { databaseURL } = require('../config/config');
 
@@ -11,7 +11,7 @@ async function seedGames() {
     try {
         for (const id of seedIDs) {
             const url = `https://boardgamegeek.com/xmlapi/boardgame/${id}`;
-            const gameData = await fetchAndParseXML(url);
+            const gameData = await fetchBoardGameData(url);
             if (gameData) {
                 const newGame = await Game.create(gameData);
                 gameIDs.push(newGame._id);
@@ -46,12 +46,37 @@ async function seedUsers(gameIDs) {
     return result;
 }
 
+async function seedEvents(gameIDs, userIDs) {
+    try {
+        const game = await Game.findById(gameIDs[0]);
+        const host = await User.findById(userIDs[0]);
+
+        const newEvent = await Event.create({
+            title: 'Sample Event',
+            host: host._id,
+            participants: [],
+            eventDate: new Date(),
+            game: game._id,
+            location: host.location,
+            minParticipants: game.minplayers,
+            maxParticipants: game.maxplayers,
+            gamelength: game.playtime,
+            status: 'published'
+        });
+
+        console.log(`Inserted event data with ID: ${newEvent._id}`);
+    } catch (error) {
+        console.error('Error seeding events: ', error);
+    }
+}
+
 async function seed() {
     await databaseConnector(databaseURL);
     await databaseClear();
 
     let gameIDs = await seedGames(); // Get the game IDs from seeding games
-    let newUsers = await seedUsers(gameIDs); // Pass the game IDs to seedUsers
+    let userIDs = await seedUsers(gameIDs); // Pass the game IDs to seedUsers
+    await seedEvents(gameIDs, userIDs); // Pass game and user IDs to seedEvents
 
     console.log("Seeded the data!");
     await databaseDisconnector(); // Corrected function call
