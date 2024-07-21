@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 
+// Schema include validation and error handling of input fields
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,

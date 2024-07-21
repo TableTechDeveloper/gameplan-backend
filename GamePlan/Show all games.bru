@@ -1,0 +1,18 @@
+meta {
+  name: Show all games
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3000/events
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "password": "1!Aapoisdfkljn",
+    "username": "Freyja"
+  }
+}
