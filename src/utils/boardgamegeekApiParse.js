@@ -43,7 +43,7 @@ async function fetchBoardGameData(url) {
 }
 
 // Function to search for a game by name and retrieve its object ID
-const searchForGame = async (name) => {
+const searchForSingleGame = async (name) => {
     try {
         const response = await axios.get("https://boardgamegeek.com/xmlapi/search?search=" + name + "&exact=1");
         const parsedData = await xml2js.parseStringPromise(response.data);
@@ -71,6 +71,6 @@ const searchForMultipleGames = async (name) => {
 
 module.exports = {
     fetchBoardGameData,
-    searchForGame,
+    searchForSingleGame,
     searchForMultipleGames
 }
