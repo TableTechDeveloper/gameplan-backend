@@ -1,5 +1,5 @@
-const axios = require('axios')
-const xml2js = require('xml2js')
+const axios = require("axios")
+const xml2js = require("xml2js")
 
 // Function to call on the boardgamegeek API (v1) to return data on a given boardgame given the boargamegeek id
 async function fetchBoardGameData(url) {
@@ -10,7 +10,7 @@ async function fetchBoardGameData(url) {
 
         let boardgameName = "";
         for (const name of boardgameContent.name) {
-            if (name.$.primary === 'true') {
+            if (name.$.primary === "true") {
                 boardgameName = name._;
                 break
             }
@@ -37,7 +37,7 @@ async function fetchBoardGameData(url) {
         }
 
     } catch (error) {
-        console.error('Error fetching or parsing XML data: ', error)
+        console.error("Error fetching or parsing XML data: ", error)
         return null
     }
 }

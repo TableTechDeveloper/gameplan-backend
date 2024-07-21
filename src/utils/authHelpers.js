@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const { jwtKey } = require('../config/config');
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+const { jwtKey } = require("../config/config");
 
 // Function to confirm if a password input by user matches the hashed password stored in database
 async function checkPassword(plaintextPassword, encryptedPassword) {

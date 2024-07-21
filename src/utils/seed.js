@@ -1,8 +1,8 @@
 // seed.js
-const { fetchBoardGameData } = require('./boardgamegeekApiParse');
-const { Game, User, Event } = require('../models/models');
-const { databaseConnector, databaseDisconnector, databaseClear } = require('./database');
-const { databaseURL } = require('../config/config');
+const { fetchBoardGameData } = require("./boardgamegeekApiParse");
+const { Game, User, Event } = require("../models/models");
+const { databaseConnector, databaseDisconnector, databaseClear } = require("./database");
+const { databaseURL } = require("../config/config");
 
 async function seedGames() {
     const gameIDs = []
@@ -21,9 +21,9 @@ async function seedGames() {
             }
         }
 
-        console.log('Seeding completed');
+        console.log("Seeding completed");
     } catch (error) {
-        console.error('Error seeding games: ', error);
+        console.error("Error seeding games: ", error);
     }
     return gameIDs;
 }
@@ -52,7 +52,7 @@ async function seedEvents(gameIDs, userIDs) {
         const host = await User.findById(userIDs[0]);
 
         const newEvent = await Event.create({
-            title: 'Sample Event',
+            title: "Sample Event",
             host: host._id,
             participants: [],
             eventDate: new Date(),
@@ -61,12 +61,12 @@ async function seedEvents(gameIDs, userIDs) {
             minParticipants: game.minplayers,
             maxParticipants: game.maxplayers,
             gamelength: game.playtime,
-            status: 'published'
+            status: "published"
         });
 
         console.log(`Inserted event data with ID: ${newEvent._id}`);
     } catch (error) {
-        console.error('Error seeding events: ', error);
+        console.error("Error seeding events: ", error);
     }
 }
 

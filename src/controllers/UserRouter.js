@@ -1,13 +1,13 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { User } = require('../models/models');
-const { createJWT, checkPassword } = require('../utils/authHelpers');
+const { User } = require("../models/models");
+const { createJWT, checkPassword } = require("../utils/authHelpers");
 
 /**
  * Route to POST a new user registering.
  * Requires body to include email, password and username (optional) location
  */
-router.post('/register', async (request, response, next) => {
+router.post("/register", async (request, response, next) => {
     const { email, password, username, location } = request.body;
 
     const newUser = new User({
@@ -24,23 +24,23 @@ router.post('/register', async (request, response, next) => {
         const token = createJWT(newUser._id);
         response.status(201).json({ token, user: newUser });
     } catch (error) {
-        if (error.name === 'ValidationError') {
+        if (error.name === "ValidationError") {
             // If the error is due to a validation error for not meeting model schema, return with the message provided in the schema
             const messages = Object.values(error.errors).map(val => val.message);
             response.status(400).json({
-                error: 'Validation failed',
+                error: "Validation failed",
                 messages: messages
             });
         } else if (error.code === 11000) {
             // Handle duplicate key errors if user attempts to register with an already in use email or username
             response.status(400).json({
-                error: 'Duplicate key error',
-                message: 'This email address or username is already in use!'
+                error: "Duplicate key error",
+                message: "This email address or username is already in use!"
             });
         } else {
             // Provide server error if user still not created but not due to previous error catches
             response.status(500).json({
-                error: 'Error registering new user'
+                error: "Error registering new user"
             });
         }
     }
@@ -50,7 +50,7 @@ router.post('/register', async (request, response, next) => {
  * Route to POST an exisiting user login
  * Requires username and password
  */
-router.post('/login', async (request, response, next) => {
+router.post("/login", async (request, response, next) => {
     let newJwt = "";
     // If body request is missing either the username or password return with an error
     if (!request.body.password || !request.body.username) {

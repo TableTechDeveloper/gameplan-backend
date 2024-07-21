@@ -1,8 +1,8 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 
 async function databaseConnector(databaseURL) {
     await mongoose.connect(databaseURL)
-    console.log('Database connection completed')
+    console.log("Database connection completed")
 }
 
 async function databaseDisconnector(){
