@@ -1,11 +1,10 @@
-// seed.js
 const { fetchBoardGameData } = require("./boardgamegeekApiParse");
 const { Game, User, Event } = require("../models/models");
 const { databaseConnector, databaseDisconnector, databaseClear } = require("./database");
 const { databaseURL } = require("../config/config");
 
 async function seedGames() {
-    const gameIDs = []
+    const gameIDs = [];
     const seedIDs = [234931, 149296, 15045, 151347, 150376, 164153, 124742, 175324, 185104, 18901, 233078, 141430, 163745, 1931, 2452, 1917, 320, 4864, 1294, 15046, 71921, 312267, 296912, 192291, 128882, 54043, 343629, 50381, 62871, 140934, 2223, 179172, 244500, 341772, 110327, 338521, 280986, 1927, 181304, 237182, 161970, 39856, 160069, 124172];
 
     try {
@@ -40,7 +39,7 @@ async function seedUsers(gameIDs) {
     ];
     let result = await Promise.all(userData.map(async (user) => {
         let newUser = await User.create(user);
-        return newUser
+        return newUser;
     }));
     console.log(result);
     return result;
@@ -48,23 +47,46 @@ async function seedUsers(gameIDs) {
 
 async function seedEvents(gameIDs, userIDs) {
     try {
-        const game = await Game.findById(gameIDs[0]);
-        const host = await User.findById(userIDs[0]);
+        // First Event
+        const game1 = await Game.findById(gameIDs[0]);
+        const host1 = await User.findById(userIDs[0]);
 
-        const newEvent = await Event.create({
+        const newEvent1 = await Event.create({
             title: "Sample Event",
-            host: host._id,
+            host: host1._id,
             participants: [],
             eventDate: new Date(),
-            game: game._id,
-            location: host.location,
-            minParticipants: game.minplayers,
-            maxParticipants: game.maxplayers,
-            gamelength: game.playtime,
-            status: "published"
+            game: game1._id,
+            location: host1.location,
+            minParticipants: game1.minplayers,
+            maxParticipants: game1.maxplayers,
+            gamelength: game1.playtime,
+            isPublished: true,
+            isPublic: true
         });
 
-        console.log(`Inserted event data with ID: ${newEvent._id}`);
+        console.log(`Inserted event data with ID: ${newEvent1._id}`);
+
+        // Second Event
+        const game2 = await Game.findById(gameIDs[1]);
+        const host2 = await User.findById(userIDs[0]);
+
+        const newEvent2 = await Event.create({
+            title: "Private Game Night",
+            host: host2._id,
+            participants: [],
+            eventDate: new Date(),
+            game: game2._id,
+            location: host2.location,
+            minParticipants: game2.minplayers,
+            maxParticipants: game2.maxplayers,
+            gamelength: game2.playtime,
+            isPublished: true,
+            isPublic: false
+        });
+
+        console.log(`Inserted event data with ID: ${newEvent2._id}`);
+
     } catch (error) {
         console.error("Error seeding events: ", error);
     }
