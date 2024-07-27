@@ -1,7 +1,8 @@
-const axios = require("axios")
-const xml2js = require("xml2js")
+const axios = require("axios");
+const xml2js = require("xml2js");
+const { handleAxiosError } = require("./errorHandler");
 
-// Function to call on the boardgamegeek API (v1) to return data on a given boardgame given the boargamegeek id
+// Function to fetch board game data from the BoardGameGeek API given a URL
 async function fetchBoardGameData(url) {
     try {
         const response = await axios.get(url);
@@ -9,12 +10,14 @@ async function fetchBoardGameData(url) {
         const boardgameContent = parsedData.boardgames.boardgame[0];
 
         let boardgameName = "";
+        // Loop through the name elements to find the primary name
         for (const name of boardgameContent.name) {
             if (name.$.primary === "true") {
                 boardgameName = name._;
-                break
+                break;
             }
         }
+        // Extract other relevant information from the board game content
         const boardgameDescription = boardgameContent.description[0];
         const boardgameGeekRef = boardgameContent.$.objectid;
         const yearPublished = boardgameContent.yearpublished[0];
@@ -24,6 +27,7 @@ async function fetchBoardGameData(url) {
         const thumbnail = boardgameContent.thumbnail[0];
         const image = boardgameContent.image[0];
 
+        // Return an object containing the extracted board game information
         return {
             name: boardgameName,
             boardgamegeekref: boardgameGeekRef,
@@ -34,43 +38,47 @@ async function fetchBoardGameData(url) {
             description: boardgameDescription,
             thumbnail: thumbnail,
             image: image
-        }
+        };
 
     } catch (error) {
-        console.error("Error fetching or parsing XML data: ", error)
-        return null
+        handleAxiosError(error);
+        return null;
     }
 }
 
-// Function to search for a game by name and retrieve its object ID
-const searchForSingleGame = async (name) => {
+// Function to search for a game by name and retrieve its object ID from the BoardGameGeek API
+async function searchForSingleGame(name) {
     try {
+        // Make an HTTP GET request to search for the game by name with exact matching
         const response = await axios.get("https://boardgamegeek.com/xmlapi/search?search=" + name + "&exact=1");
         const parsedData = await xml2js.parseStringPromise(response.data);
         const boardgamedata = parsedData.boardgames.boardgame[0];
+        // Extract and log the object ID of the board game
         const id = boardgamedata.$.objectid;
         console.log(id);
     } catch (error) {
-        console.error("Error occured: ", error);
+        handleAxiosError(error);
     }
 }
 
-// Function to search for a game by name and retrieve its object ID
-const searchForMultipleGames = async (name) => {
+// Function to search for multiple games by name and retrieve their object IDs from the BoardGameGeek API
+async function searchForMultipleGames(name) {
     try {
+        // Make an HTTP GET request to search for games by name
         const response = await axios.get("https://boardgamegeek.com/xmlapi/search?search=" + name);
         const parsedData = await xml2js.parseStringPromise(response.data);
         const boardgamedata = parsedData.boardgames.boardgame[0];
+        // Extract and log the object ID of the board game
         const id = boardgamedata.$.objectid;
         console.log(id);
     } catch (error) {
-        console.error("Error occured: ", error);
+        // Handle any errors that occur during the HTTP request or data parsing
+        handleAxiosError(error);
     }
 }
-
 
 module.exports = {
     fetchBoardGameData,
     searchForSingleGame,
     searchForMultipleGames
-}
+};
