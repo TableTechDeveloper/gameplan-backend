@@ -45,26 +45,34 @@ function decodeJwt(jwtToDecode) {
     return decodedData;
 }
 
-// Authenticate a JWT and extract the user ID
 function authenticateJWT(request, response, next) {
-    // Get the token from the request header
-    const token = request.header("Authorization");
+    const authHeader = request.header("Authorization");
+    console.log("Auth Header:", authHeader); // Debugging line
 
-    // If no token is provided, return access denied response
+    if (!authHeader) {
+        return response.status(401).json({
+            status: 401,
+            message: "Access Denied. No Authorization header provided"
+        });
+    }
+
+    const token = authHeader.split(" ")[1];
+    console.log("Token:", token); // Debugging line
+
     if (!token) {
         return response.status(401).json({
             status: 401,
-            message: "Access Denied. User not logged in"
+            message: "Access Denied. No token provided"
         });
     }
+
     try {
-        // Verify the token and extract the decoded data
         const decoded = jwt.verify(token, jwtKey);
-        // Attach the decoded user data to the request object
+        console.log("Decoded JWT:", decoded); // Debugging line
         request.user = decoded;
         next();
     } catch (error) {
-        // If the token is invalid, return an error response
+        console.error("JWT Verification Error:", error); // Debugging line
         response.status(400).json({
             status: 400,
             message: "Invalid token"

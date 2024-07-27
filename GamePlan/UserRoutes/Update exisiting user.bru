@@ -1,0 +1,21 @@
+meta {
+  name: Update exisiting user
+  type: http
+  seq: 3
+}
+
+patch {
+  url: http://localhost:3000/user/update
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTRjZDdlODExZjM4ODZkMzA5MTZlZCIsImlhdCI6MTcyMjA3NjU2NSwiZXhwIjoxNzIyNjgxMzY1fQ.VuhSj7x71rjwWNjXSOzswG4FM8W85jU8j7_lSkDoBWw
+}
+
+body:json {
+  {
+    "location": "Home"
+  }
+}
