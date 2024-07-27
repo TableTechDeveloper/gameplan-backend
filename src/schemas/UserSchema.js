@@ -12,10 +12,7 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, "Password is required"],
-        unique: false,
-        minlength: [8, "Password must be at least 8 characters long"],
-        maxlength: [16, "Password must be at most 16 characters long"],
-        match: [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"]
+        unique: false
     },
     username: {
         type: String,
@@ -46,17 +43,16 @@ const UserSchema = new mongoose.Schema({
     timestamps: true
 })
 
-UserSchema.pre(
-    "save",
-    async function (next) {
-        const user = this;
-        if (!user.isModified("password")){
-            return;
-        }
-        const hash = await bcrypt.hash(this.password, 10)
-        this.password = hash
-        next()
+UserSchema.pre("save", async function (next) {
+    const user = this;
+    if (!user.isModified("password")){
+        return;
     }
-)
+    const hash = await bcrypt.hash(this.password, 10)
+    this.password = hash
+    next()
+});
+
+
 
 module.exports = UserSchema

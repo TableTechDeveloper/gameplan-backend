@@ -29,7 +29,22 @@ function handleValidationError(error, response) {
     }
 }
 
+function validatePassword(password){
+    const regexLength = /^.{8,16}$/;
+    const regexLowercase = /[a-z]/;
+    const regexUppercase = /[A-Z]/;
+    const regexDigit = /\d/;
+    const regexSpecial = /[@$!%*?&]/;
+
+    return regexLength.test(password) &&
+           regexLowercase.test(password) &&
+           regexUppercase.test(password) &&
+           regexDigit.test(password) &&
+           regexSpecial.test(password);
+}
+
 // Export the function to make it available for import in other files
 module.exports = {
-    handleValidationError
+    handleValidationError,
+    validatePassword
 };

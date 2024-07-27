@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { User } = require("../models/models");
 const { createJWT, checkPassword, authenticateJWT } = require("../utils/authHelpers");
-const { handleValidationError } = require("../utils/validation");
+const { handleValidationError, validatePassword } = require("../utils/validation");
+const bcrypt = require("bcryptjs")
 
 /**
  * Route to POST a new user registering.
@@ -19,6 +20,13 @@ router.post("/register", async (request, response, next) => {
         username,
         location
     });
+
+    if(!validatePassword(password)) {
+        return response.status(400).json({
+            status: 400,
+            message: "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character."
+        })
+    }
 
     try {
         // Save the new user to the database
@@ -97,20 +105,26 @@ router.post("/login", async (request, response, next) => {
  * Requires the user to be authenticated.
  */
 router.patch("/update", authenticateJWT, async (request, response, next) => {
-    // Extract the user ID from the authenticated user's JWT
     const userId = request.user.id;
     const updatedDetails = request.body;
 
+    if (updatedDetails.password) {
+        if(!validatePassword(updatedDetails.password)) {
+            return response.status(400).json({
+                status: 400,
+                message: "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character."
+            })
+        }
+        updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
+    }
+
     try {
-        // Find the user by ID and update their details
         const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
-            new: true, // Return the updated user document
-            runValidators: true // Run schema validators on the updated data
+            new: true,
+            runValidators: true
         });
 
-        // Check if the user was found and updated
         if (!updatedUser) {
-            // Send a 404 Not Found response if the user does not exist
             return response.status(404).json({
                 status: 404,
                 message: "User not found",
@@ -118,7 +132,6 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
             });
         }
 
-        // Send the updated user details in the response
         response.json(updatedUser);
     } catch (error) {
         handleValidationError(error, response);
