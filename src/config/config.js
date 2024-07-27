@@ -1,3 +1,4 @@
+// src/config/config.js
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -8,17 +9,17 @@ const config = {
     databaseURL: (() => {
         switch (process.env.NODE_ENV.toLowerCase()) {
             case "test":
-                return "mongodb://localhost:27017/GamePlanDB-test";
+                return process.env.DATABASE_URL_TEST || "mongodb://localhost:27017/GamePlanDB-test";
             case "development":
-                return "mongodb://localhost:27017/GamePlanDB-dev";
+                return process.env.DATABASE_URL_DEV || "mongodb://localhost:27017/GamePlanDB-dev";
             case "production":
-                return process.env.DATABASE_URL;
+                return process.env.DATABASE_URL || "";
             default:
                 console.error("Incorrect JS environment specified, database will not be connected");
                 return "";
         }
     })(),
-    jwtKey: process.env.JWT_KEY
+    jwtKey: process.env.JWT_KEY || "default_jwt_key"
 };
 
 module.exports = config;

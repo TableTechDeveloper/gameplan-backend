@@ -1,12 +1,10 @@
+// src/controllers/UserRouter.js
 const express = require("express");
 const router = express.Router();
 const { User } = require("../models/models");
-const { createJWT, checkPassword } = require("../utils/authHelpers");
+const { createJWT, checkPassword, authenticateJWT } = require("../utils/authHelpers");
+const { handleValidationError } = require("../utils/validation");
 
-/**
- * Route to POST a new user registering.
- * Requires body to include email, password, username, and (optional) location
- */
 router.post("/register", async (request, response, next) => {
     const { email, password, username, location } = request.body;
 
@@ -22,30 +20,10 @@ router.post("/register", async (request, response, next) => {
         const token = createJWT(newUser._id);
         response.status(201).json({ token, user: newUser });
     } catch (error) {
-        if (error.name === "ValidationError") {
-            const messages = Object.values(error.errors).map(val => val.message);
-            return response.status(400).json({
-                error: "Validation failed",
-                messages: messages
-            });
-        } else if (error.code === 11000) {
-            return response.status(400).json({
-                error: "Duplicate key error",
-                message: "This email address or username is already in use!"
-            });
-        } else {
-            return response.status(500).json({
-                error: "Error registering new user",
-                message: error.message
-            });
-        }
+        handleValidationError(error, response);
     }
 });
 
-/**
- * Route to POST an existing user login
- * Requires username and password
- */
 router.post("/login", async (request, response, next) => {
     const { username, password } = request.body;
 
@@ -82,6 +60,7 @@ router.post("/login", async (request, response, next) => {
             });
         }
     } catch (error) {
+        console.error("Error logging in:", error);
         return response.status(500).json({
             status: 500,
             message: "Error logging in",
