@@ -72,15 +72,14 @@ async function searchForMultipleGames(name) {
         const response = await axios.get(`https://boardgamegeek.com/xmlapi/search?search=${name}`);
         const parsedData = await xml2js.parseStringPromise(response.data);
         const boardgameResults = parsedData.boardgames.boardgame;
+        console.log("Results: ", boardgameResults)
 
-        // Return minimal data for each result
-        // Originally had the same function to output all the game data for each result, however when used for games such as Monopoly, as there are huge numbers of games matching the description the promise would take over 5 minutes to perform.
-        // Instead implementing a secondary route to get more game information in the GameRouter
+        // Return minimal data for each result, ensuring all necessary properties exist
         const gameData = boardgameResults.map(game => ({
             id: game.$.objectid,
-            name: game.name[0]._,
-            yearpublished: game.yearpublished[0]
-        }));
+            name: game.name && game.name[0] && game.name[0]._,
+            yearpublished: game.yearpublished && game.yearpublished[0]
+        })).filter(game => game.name && game.yearpublished);
 
         return gameData;
     } catch (error) {

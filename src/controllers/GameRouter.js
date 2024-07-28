@@ -23,6 +23,7 @@ router.get("/search", authenticateJWT, async (request, response, next) => {
         } else {
             gameData = await searchForMultipleGames(query);
         }
+        console.log("Game Data: ", gameData)
         if (!gameData || gameData.length === 0) {
             return response.status(404).json({
                 status: 404,

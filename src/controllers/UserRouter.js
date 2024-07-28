@@ -158,7 +158,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         });
     } catch (error) {
         console.error("Error retrieving games: ", error);
-        response.status(500).jason({
+        response.status(500).json({
             status: 500,
             message: "Error retrieving games",
             errors: [error.message]
