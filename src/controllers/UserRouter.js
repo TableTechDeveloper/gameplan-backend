@@ -20,7 +20,7 @@ router.post("/register", async (request, response, next) => {
         location
     });
 
-    if(!validatePassword(password)) {
+    if (!validatePassword(password)) {
         return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
     }
 
@@ -61,7 +61,7 @@ router.post("/login", async (request, response, next) => {
         }
     } catch (error) {
         console.error("Error logging in:", error);
-        sendErrorResponse(response, 500, "Error logging in", [error.message]);
+        next(error); // Pass the error to the centralized error-handling middleware
     }
 });
 
@@ -74,7 +74,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     const updatedDetails = request.body;
 
     if (updatedDetails.password) {
-        if(!validatePassword(updatedDetails.password)) {
+        if (!validatePassword(updatedDetails.password)) {
             return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
         }
         updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
@@ -96,7 +96,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     }
 });
 
-// Route to GET a users game collection
+// Route to GET a user's game collection
 router.get("/collection", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -108,7 +108,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         sendSuccessResponse(response, 200, "Games retrieved successfully", { games: user.gamesOwned });
     } catch (error) {
         console.error("Error retrieving games: ", error);
-        sendErrorResponse(response, 500, "Error retrieving games", [error.message]);
+        next(error); // Pass the error to the centralized error-handling middleware
     }
 });
 
@@ -137,7 +137,7 @@ router.get("/collection/search", authenticateJWT, async (request, response, next
         sendSuccessResponse(response, 200, "Games retrieved successfully", { games: filteredGames });
     } catch (error) {
         console.error("Error searching games: ", error);
-        sendErrorResponse(response, 500, "Error searching games", [error.message]);
+        next(error); // Pass the error to the centralized error-handling middleware
     }
 });
 
@@ -166,7 +166,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         sendSuccessResponse(response, 200, `Game: ${game.name} has been removed from ${user.username}'s collection successfully`, {});
     } catch (error) {
         console.error("Error removing game from collection:", error);
-        sendErrorResponse(response, 500, "Error removing game from collection", [error.message]);
+        next(error); // Pass the error to the centralized error-handling middleware
     }
 });
 
@@ -186,7 +186,7 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         });
     } catch (error) {
         console.error("Error retrieving user: ", error);
-        sendErrorResponse(response, 500, "Error retrieving user", [error.message]);
+        next(error); // Pass the error to the centralized error-handling middleware
     }
 });
 

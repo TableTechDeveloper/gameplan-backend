@@ -10,7 +10,7 @@ router.get("/", async (request, response, next) => {
         const foundEvents = await Event.find({ isPublic: true, isPublished: true }).exec();
         sendSuccessResponse(response, 200, "Events retrieved successfully", { foundEvents });
     } catch (error) {
-        sendErrorResponse(response, 500, "Error retrieving events", [error.message]);
+        next(error);
     }
 });
 
@@ -23,7 +23,7 @@ router.get("/:id", async (request, response, next) => {
         }
         sendSuccessResponse(response, 200, "Event retrieved successfully", { result });
     } catch (error) {
-        sendErrorResponse(response, 500, "Error retrieving event", [error.message]);
+        next(error);
     }
 });
 
@@ -59,7 +59,7 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
 
         sendSuccessResponse(response, 200, `User has successfully registered for the ${event.title} event`, { event, user });
     } catch (error) {
-        sendErrorResponse(response, 500, "Error registering for the event", [error.message]);
+        next(error);
     }
 });
 
@@ -106,7 +106,7 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
 
         sendSuccessResponse(response, 201, "Event created successfully", { newEvent });
     } catch (error) {
-        sendErrorResponse(response, 500, "Error creating event", [error.message]);
+        next(error);
     }
 });
 
@@ -128,7 +128,7 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
 
         sendSuccessResponse(response, 200, "Event deleted successfully", {});
     } catch (error) {
-        sendErrorResponse(response, 500, "Error deleting event", [error.message]);
+        next(error);
     }
 });
 
@@ -158,7 +158,7 @@ router.patch("/:id", authenticateJWT, async (request, response, next) => {
 
         sendSuccessResponse(response, 200, "Event updated successfully", { event });
     } catch (error) {
-        sendErrorResponse(response, 500, "Error updating event", [error.message]);
+        next(error);
     }
 });
 

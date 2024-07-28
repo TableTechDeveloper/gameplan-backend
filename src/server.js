@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { databaseURL } = require("./config/config");
+const { errorHandler } = require("./utils/errorHandler")
 
 const app = express();
 
@@ -25,5 +26,7 @@ app.use("/events", eventRoute);
 
 const gameRoute = require("./controllers/GameRouter");
 app.use("/games", gameRoute)
+
+app.use(errorHandler);
 
 module.exports = app;
