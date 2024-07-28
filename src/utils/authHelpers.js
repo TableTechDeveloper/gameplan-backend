@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { jwtKey } = require("../config/config");
+const { User } = require("../models/models");
 
 // Function to confirm if a password input by the user matches the hashed password stored in the database
 async function checkPassword(plaintextPassword, encryptedPassword) {
@@ -21,28 +22,6 @@ function createJWT(userId) {
         }
     );
     return newJwt;
-}
-
-// Function to check if a given JWT is valid
-function validateJwt(jwtToValidate) {
-    let isJwtValid = false;
-    // Verify the JWT using the JWT key
-    jwt.verify(jwtToValidate, jwtKey, (error, decodedJwt) => {
-        if (error) {
-            throw new Error("User JWT is not valid!");
-        }
-        console.log("Decoded JWT data:");
-        console.log(decodedJwt);
-        isJwtValid = true;
-    });
-    return isJwtValid;
-}
-
-// Function to decode a JWT and extract its payload
-function decodeJwt(jwtToDecode) {
-    // Decode the JWT using the JWT key
-    let decodedData = jwt.verify(jwtToDecode, jwtKey);
-    return decodedData;
 }
 
 function authenticateJWT(request, response, next) {
@@ -79,7 +58,5 @@ function authenticateJWT(request, response, next) {
 module.exports = {
     checkPassword,
     createJWT,
-    validateJwt,
-    decodeJwt,
     authenticateJWT
 };

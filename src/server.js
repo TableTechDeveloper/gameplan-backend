@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { databaseURL } = require("./config/config");
+const { errorHandler } = require("./utils/errorHandler");
+const { sendErrorResponse } = require("./utils/responseHelpers");
 
 const app = express();
 
@@ -9,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Connect to the database
 if (databaseURL) {
     mongoose.connect(databaseURL)
         .then(() => console.log("Database connected successfully"))
@@ -17,13 +20,24 @@ if (databaseURL) {
     console.error("No valid database URL provided");
 }
 
+// Import and use user routes
 const userRoute = require("./controllers/UserRouter");
 app.use("/user", userRoute);
 
+// Import and use event routes
 const eventRoute = require("./controllers/EventRouter");
 app.use("/events", eventRoute);
 
+// Import and use game routes
 const gameRoute = require("./controllers/GameRouter");
-app.use("/games", gameRoute)
+app.use("/games", gameRoute);
+
+// Catch-all route for handling 404 errors
+app.use((request, response, next) => {
+    sendErrorResponse(response, 404, "Not Found", ["The requested resource could not be found"]);
+});
+
+// General error handler middleware
+app.use(errorHandler);
 
 module.exports = app;

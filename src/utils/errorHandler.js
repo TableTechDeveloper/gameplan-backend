@@ -15,6 +15,16 @@ function handleAxiosError(error) {
     console.error("Config:", error.config);
 }
 
+function errorHandler(error, request, response, next) {
+    console.error(error.stack);
+    response.status(500).json({
+        status: 500,
+        message: "Internal Server Error",
+        errors: [error.message]
+    })
+}
+
 module.exports = {
-    handleAxiosError
+    handleAxiosError,
+    errorHandler
 };
