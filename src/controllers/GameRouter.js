@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
 const { authenticateJWT } = require("../utils/authHelpers");
 const { searchForSingleGame, searchForMultipleGames, fetchBoardGameData } = require("../utils/boardgamegeekApiParse");
 const { User, Game } = require("../models/models");
