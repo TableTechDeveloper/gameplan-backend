@@ -6,10 +6,16 @@ meta {
 
 post {
   url: http://localhost:3000/games/add
-  body: none
+  body: json
   auth: bearer
 }
 
 auth:bearer {
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTU5YWY3MmFkMGFiMGY5ZjU4YjY2YSIsImlhdCI6MTcyMjEzMTk4NywiZXhwIjoxNzIyNzM2Nzg3fQ.JYEnS1yOIXrK6cUfgRfA1mDUBFH-VPODzpumv0MxEP4
+}
+
+body:json {
+  {
+    "gameId": "31481"
+  }
 }
