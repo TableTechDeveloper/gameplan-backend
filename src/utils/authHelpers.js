@@ -55,14 +55,8 @@ function authenticateJWT(request, response, next) {
     }
 }
 
-// New function to check if a user exists by ID
-async function getUserById(userId) {
-    return await User.findById(userId).exec();
-}
-
 module.exports = {
     checkPassword,
     createJWT,
-    authenticateJWT,
-    getUserById
+    authenticateJWT
 };

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { Event, User, Game } = require("../models/models");
-const { authenticateJWT, getUserById } = require("../utils/authHelpers");
+const { authenticateJWT } = require("../utils/authHelpers");
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 
 // Route to GET and display all PUBLIC and PUBLISHED events
@@ -38,7 +38,7 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
             return sendErrorResponse(response, 404, "Event not found", ["This event does not exist"]);
         }
 
-        const user = await getUserById(userId);
+        const user = await User.findById(userId).exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
         }
@@ -69,7 +69,7 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
         const userId = request.user.id;
         const { title, eventDate, game, location, minParticipants, maxParticipants, gamelength, isPublic, isPublished } = request.body;
 
-        const user = await getUserById(userId);
+        const user = await User.findById(userId).exec();
         if (!user.gamesOwned.includes(game)) {
             return sendErrorResponse(response, 400, "Game not owned", ["You can only host events with games you own"]);
         }

@@ -1,15 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { authenticateJWT, getUserById } = require("../utils/authHelpers");
+const { authenticateJWT } = require("../utils/authHelpers");
 const { searchForSingleGame, searchForMultipleGames, fetchBoardGameData } = require("../utils/boardgamegeekApiParse");
 const { User, Game } = require("../models/models");
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 
 // Route to search for games
 router.get("/search", authenticateJWT, async (request, response, next) => {
-    const { query, strict }
-
- = request.query;
+    const { query, strict } = request.query;
 
     if (!query) {
         return sendErrorResponse(response, 400, "Missing search query", ["Search terms are required"]);
@@ -80,7 +78,7 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
         }
 
         // Check if the user exists
-        const user = await getUserById(userId);
+        const user = await User.findById(userId).exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The authenticated user does not exist"]);
         }
