@@ -4,7 +4,7 @@ const { Event, User, Game } = require("../models/models");
 const { authenticateJWT } = require("../utils/authHelpers");
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 
-// Route to GET and display all PUBLIC and PUBLISHED events
+// Route to GET and display all PUBLIC and PUBLISHED events.
 router.get("/", async (request, response, next) => {
     try {
         const foundEvents = await Event.find({ isPublic: true, isPublished: true }).exec();
@@ -14,7 +14,7 @@ router.get("/", async (request, response, next) => {
     }
 });
 
-// Route to GET and display an event when given an ID
+// Route to GET and display an event when given an ID.
 router.get("/:id", async (request, response, next) => {
     try {
         const result = await Event.findById(request.params.id).exec();
@@ -27,7 +27,7 @@ router.get("/:id", async (request, response, next) => {
     }
 });
 
-// Route to POST a user registering their attendance to an event
+// Route to POST a user registering their attendance to an event.
 router.post("/:id/register", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -63,7 +63,7 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
     }
 });
 
-// Route to POST a new event
+// Route to POST a new event.
 router.post("/new", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -110,7 +110,7 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
     }
 });
 
-// Route to delete an event
+// Route to DELETE an event.
 router.delete("/:id", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -132,7 +132,7 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
     }
 });
 
-// Route to PATCH (edit) an event
+// Route to PATCH (edit) an event.
 router.patch("/:id", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;

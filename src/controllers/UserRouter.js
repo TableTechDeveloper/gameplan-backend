@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { User, Game } = require("../models/models");
+const { User, Game, Event } = require("../models/models");
 const { createJWT, checkPassword, authenticateJWT } = require("../utils/authHelpers");
 const { handleValidationError, validatePassword } = require("../utils/validation");
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
@@ -61,7 +61,7 @@ router.post("/login", async (request, response, next) => {
         }
     } catch (error) {
         console.error("Error logging in:", error);
-        next(error); // Pass the error to the centralized error-handling middleware
+        next(error);
     }
 });
 
@@ -107,8 +107,8 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         }
         sendSuccessResponse(response, 200, "Games retrieved successfully", { games: user.gamesOwned });
     } catch (error) {
-        console.error("Error retrieving games: ", error);
-        next(error); // Pass the error to the centralized error-handling middleware
+        console.error("Error retrieving games:", error);
+        next(error);
     }
 });
 
@@ -136,8 +136,8 @@ router.get("/collection/search", authenticateJWT, async (request, response, next
 
         sendSuccessResponse(response, 200, "Games retrieved successfully", { games: filteredGames });
     } catch (error) {
-        console.error("Error searching games: ", error);
-        next(error); // Pass the error to the centralized error-handling middleware
+        console.error("Error searching games:", error);
+        next(error);
     }
 });
 
@@ -166,7 +166,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         sendSuccessResponse(response, 200, `Game: ${game.name} has been removed from ${user.username}'s collection successfully`, {});
     } catch (error) {
         console.error("Error removing game from collection:", error);
-        next(error); // Pass the error to the centralized error-handling middleware
+        next(error);
     }
 });
 
@@ -186,8 +186,52 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         });
     } catch (error) {
         console.error("Error retrieving user: ", error);
-        next(error); // Pass the error to the centralized error-handling middleware
+        next(error);
     }
 });
+
+// Route to display all events user is participating in or hosting based on the filter
+router.get("/events", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const isHosted = request.query.hosted === "true";
+
+        let events;
+
+        if (isHosted) {
+            // Fetch events hosted by the user
+            events = await Event.find({ host: userId }).exec();
+        } else {
+            // Fetch events the user is participating in
+            const user = await User.findById(userId).populate("eventsAttending").exec();
+            if (!user) {
+                return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
+            }
+            events = user.eventsAttending;
+        }
+
+        sendSuccessResponse(response, 200, "Events retrieved successfully", { events });
+    } catch (error) {
+        console.error("Error retrieving events:", error);
+        next(error);
+    }
+});
+
+// Route to delete the current logged in user
+router.delete("/", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
+        }
+
+        await User.findByIdAndDelete(userId)
+        
+        sendSuccessResponse(response, 200, "User deleted successfully", {});
+    } catch (error) {
+        next(error);
+    }
+})
 
 module.exports = router;

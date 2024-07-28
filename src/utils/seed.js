@@ -1,4 +1,4 @@
-const { fetchBoardGameData } = require("./boardgamegeekApiParse");
+const { fetchBoardGameData } = require("./boardgamegeekApi");
 const { Game, User, Event } = require("../models/models");
 const { databaseConnector, databaseDisconnector, databaseClear } = require("./database");
 const { databaseURL } = require("../config/config");

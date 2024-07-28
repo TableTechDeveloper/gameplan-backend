@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { authenticateJWT } = require("../utils/authHelpers");
-const { searchForSingleGame, searchForMultipleGames, fetchBoardGameData } = require("../utils/boardgamegeekApiParse");
+const { searchForSingleGame, searchForMultipleGames, fetchBoardGameData } = require("../utils/boardgamegeekApi");
 const { User, Game } = require("../models/models");
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 
-// Route to search for games
+// Route to search for games.
 router.get("/search", authenticateJWT, async (request, response, next) => {
     const { query, strict } = request.query;
 
@@ -24,11 +24,11 @@ router.get("/search", authenticateJWT, async (request, response, next) => {
         }
         sendSuccessResponse(response, 200, "Games retrieved successfully", { games: gameData });
     } catch (error) {
-        next(error); // Pass the error to the centralized error-handling middleware
+        next(error);
     }
 });
 
-// Route to fetch detailed game data by ID
+// Route to fetch detailed game data by ID.
 router.get("/:id", authenticateJWT, async (request, response, next) => {
     const gameId = request.params.id;
 
@@ -40,11 +40,11 @@ router.get("/:id", authenticateJWT, async (request, response, next) => {
 
         sendSuccessResponse(response, 200, "Game retrieved successfully", { game: gameData });
     } catch (error) {
-        next(error); // Pass the error to the centralized error-handling middleware
+        next(error);
     }
 });
 
-// Route to add a game to the user's collection
+// Route to add a game to the user's collection.
 router.post("/add", authenticateJWT, async (request, response, next) => {
     const userId = request.user.id;
     const { gameId } = request.body;
@@ -94,7 +94,7 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
 
         sendSuccessResponse(response, 200, "Game added to collection successfully", { user });
     } catch (error) {
-        next(error); // Pass the error to the centralized error-handling middleware
+        next(error);
     }
 });
 
