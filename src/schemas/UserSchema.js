@@ -31,7 +31,7 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "Game",
         required: false,
-        unique: true
+        unique: false
     }],
     eventsAttending: [{
         type: mongoose.Types.ObjectId,

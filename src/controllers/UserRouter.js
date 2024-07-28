@@ -133,6 +133,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
         }
 
         response.json(updatedUser);
+        console.log("Password has been updated!")
     } catch (error) {
         handleValidationError(error, response);
     }

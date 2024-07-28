@@ -1,0 +1,29 @@
+meta {
+  name: Create new published event
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:3000/events/new
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTU5YjAwNmE1NjhmMmM2YWM3MjJjMiIsImlhdCI6MTcyMjEyOTM0NiwiZXhwIjoxNzIyNzM0MTQ2fQ.xFkP4cdzq-fpMsEVFKshEzpd6vMovGmqOvtVIvYHRvE
+}
+
+body:json {
+  {
+    "title": "2nd Published game from the event route",
+    "eventDate": "2024-08-02T00:00:00.000Z",
+    "game": "66a59aed2ad0ab0f9f58b612",
+    "location": "My House",
+    "minParticipants": "2",
+    "maxParticipants": "4",
+    "gamelength": "60",
+    "isPublic": true,
+    "isPublished": true
+  }
+}

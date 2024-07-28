@@ -47,7 +47,6 @@ function decodeJwt(jwtToDecode) {
 
 function authenticateJWT(request, response, next) {
     const authHeader = request.header("Authorization");
-    console.log("Auth Header:", authHeader); // Debugging line
 
     if (!authHeader) {
         return response.status(401).json({
@@ -57,7 +56,6 @@ function authenticateJWT(request, response, next) {
     }
 
     const token = authHeader.split(" ")[1];
-    console.log("Token:", token); // Debugging line
 
     if (!token) {
         return response.status(401).json({
@@ -68,11 +66,9 @@ function authenticateJWT(request, response, next) {
 
     try {
         const decoded = jwt.verify(token, jwtKey);
-        console.log("Decoded JWT:", decoded); // Debugging line
         request.user = decoded;
         next();
     } catch (error) {
-        console.error("JWT Verification Error:", error); // Debugging line
         response.status(400).json({
             status: 400,
             message: "Invalid token"

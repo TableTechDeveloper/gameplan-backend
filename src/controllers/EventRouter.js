@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Event, User } = require("../models/models");
+const { Event, User, Game } = require("../models/models");
 const { authenticateJWT } = require("../utils/authHelpers");
 
 // Route to GET and display all PUBLIC and PUBLISHED events
@@ -100,11 +100,11 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
         // Add the event ID to the user's eventsAttending list
         user.eventsAttending.push(eventId);
 
-        // Save the updated event to database
+        // Save the updated event to the database
         await event.save();
         await user.save();
 
-        // Send success
+        // Send success response
         response.status(200).json({
             status: 200,
             message: `User has successfully registered for the ${event.title} event`,
