@@ -1,0 +1,15 @@
+meta {
+  name: Show games owned by user
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3000/user/collection
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTU5YWY3MmFkMGFiMGY5ZjU4YjY2YSIsImlhdCI6MTcyMjEzMDYwNywiZXhwIjoxNzIyNzM1NDA3fQ.jfM1cDJWkuoJX2lLsxClLRLBQGvXJDvD8Ll7KeN441I
+}
