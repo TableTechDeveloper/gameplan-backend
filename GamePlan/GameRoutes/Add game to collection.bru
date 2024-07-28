@@ -1,0 +1,15 @@
+meta {
+  name: Add game to collection
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3000/games/add
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTU5YWY3MmFkMGFiMGY5ZjU4YjY2YSIsImlhdCI6MTcyMjEzMTk4NywiZXhwIjoxNzIyNzM2Nzg3fQ.JYEnS1yOIXrK6cUfgRfA1mDUBFH-VPODzpumv0MxEP4
+}
