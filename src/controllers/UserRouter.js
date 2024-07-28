@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { User } = require("../models/models");
+const { User, Game } = require("../models/models");
 const { createJWT, checkPassword, authenticateJWT } = require("../utils/authHelpers");
 const { handleValidationError, validatePassword } = require("../utils/validation");
 const bcrypt = require("bcryptjs")
@@ -210,6 +210,56 @@ router.get("/collection/search", authenticateJWT, async (request, response, next
         });
     }
 });
+
+// Delete game from user's collection
+router.delete("/collection/:id", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const gameId = request.params.id;
+        const game = await Game.findById(gameId).exec();
+        if (!game) {
+            return response.status(404).json({
+                status: 404,
+                message: "Game not found",
+                errors: ["This game does not exist"]
+            })
+        }
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            return response.status(404).json({
+                status: 404,
+                message: "User not found",
+                errors: ["The user is not found or not logged in"]
+            });
+        }
+    
+        // Check if game is in users collection
+        const gameInCollection = user.gamesOwned.indexOf(gameId);
+        if (gameInCollection === -1) {
+            return response.status(400).json({
+                status: 400,
+                message: "Game not in collection",
+                errors: ["The specified game is not in the user's collection"]
+            });
+        }
+
+        user.gamesOwned.splice(gameInCollection, 1);
+        await user.save()
+
+        response.status(200).json({
+            status: 200,
+            message: `Game: ${game.name} has been removed from ${user.username}'s collection successfully`
+        });
+
+    } catch (error) {
+        console.error("Error removing game from collection:", error);
+        response.status(500).json({
+            status: 500,
+            message: "Error removing game from collection",
+            errors: [error.message]
+        })
+    }
+})
 
 // ROUTE to display all information on user
 router.get("/", authenticateJWT, async (request, response, next) => {
