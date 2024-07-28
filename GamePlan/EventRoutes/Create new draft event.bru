@@ -1,0 +1,24 @@
+meta {
+  name: Create new draft event
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:3000/events/new
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTU5YjAwNmE1NjhmMmM2YWM3MjJjMiIsImlhdCI6MTcyMjEyOTIxNywiZXhwIjoxNzIyNzM0MDE3fQ.ljvmnaM8CZfDJfK3XI-YHTIhbUFcWH2cTjHZKvvZHds
+}
+
+body:json {
+  {
+    "title": "Test from the create route",
+    "game": "66a59aed2ad0ab0f9f58b612",
+    "isPublished": false,
+    "isPublic": true
+  }
+}

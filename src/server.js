@@ -17,10 +17,10 @@ if (databaseURL) {
     console.error("No valid database URL provided");
 }
 
-const userRoute = require("./controllers/UserRouter")
-app.use("/user", userRoute)
+const userRoute = require("./controllers/UserRouter");
+app.use("/user", userRoute);
 
-const eventRoute = require("./controllers/EventRouter")
-app.use("/events", eventRoute)
+const eventRoute = require("./controllers/EventRouter");
+app.use("/events", eventRoute);
 
 module.exports = app;

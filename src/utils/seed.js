@@ -65,7 +65,7 @@ async function seedEvents(gameIDs, userIDs) {
         const newEvent1 = await Event.create({
             title: "Sample Event",
             host: host1._id,
-            participants: [],
+            participants: [host1._id],
             eventDate: new Date(),
             game: game1._id,
             location: host1.location,
@@ -85,7 +85,7 @@ async function seedEvents(gameIDs, userIDs) {
         const newEvent2 = await Event.create({
             title: "Private Game Night",
             host: host2._id,
-            participants: [],
+            participants: [host2._id],
             eventDate: new Date(),
             game: game2._id,
             location: host2.location,

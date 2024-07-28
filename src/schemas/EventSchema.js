@@ -9,19 +9,19 @@ const isPublished = function () {
 const EventSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: isPublished,
+        required: true,
         unique: false
     },
     host: {
         type: mongoose.Types.ObjectId,
         ref: "User",
-        required: isPublished,
+        required: true,
         unique: false
     },
     participants:[{
         type: mongoose.Types.ObjectId,
         ref: "User",
-        required: isPublished,
+        required: true,
         unique: false
     }],
     eventDate: {
@@ -43,7 +43,7 @@ const EventSchema = new mongoose.Schema({
     minParticipants: {
         type: Number,
         unique: false,
-        required: true
+        required: isPublished
     },
     maxParticipants: {
         type: Number,
