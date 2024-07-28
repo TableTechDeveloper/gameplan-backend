@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // Function to connect to the MongoDB database
 async function databaseConnector(databaseURL) {
-    await mongoose.connect(databaseURL, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect(databaseURL);
     console.log("Database connection completed");
 }
 
