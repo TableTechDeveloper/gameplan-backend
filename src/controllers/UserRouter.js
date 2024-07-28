@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { User, Game } = require("../models/models");
-const { createJWT, checkPassword, authenticateJWT } = require("../utils/authHelpers");
+const { createJWT, checkPassword, authenticateJWT, getUserById } = require("../utils/authHelpers");
 const { handleValidationError, validatePassword } = require("../utils/validation");
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 const bcrypt = require("bcryptjs");
@@ -101,7 +101,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
 
-        const user = await User.findById(userId).populate("gamesOwned").exec();
+        const user = await getUserById(userId).populate("gamesOwned").exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
         }
@@ -125,7 +125,7 @@ router.get("/collection/search", authenticateJWT, async (request, response, next
             return sendErrorResponse(response, 400, "Missing search query", ["Search term is required"]);
         }
 
-        const user = await User.findById(userId).populate("gamesOwned").exec();
+        const user = await getUserById(userId).populate("gamesOwned").exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
         }
@@ -150,7 +150,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         if (!game) {
             return sendErrorResponse(response, 404, "Game not found", ["This game does not exist"]);
         }
-        const user = await User.findById(userId).exec();
+        const user = await getUserById(userId);
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
         }
@@ -174,7 +174,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
 router.get("/", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
-        const user = await User.findById(userId).exec();
+        const user = await getUserById(userId).exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
         }

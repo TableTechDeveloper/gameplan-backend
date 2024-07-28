@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { jwtKey } = require("../config/config");
+const { User } = require("../models/models");
 
 // Function to confirm if a password input by the user matches the hashed password stored in the database
 async function checkPassword(plaintextPassword, encryptedPassword) {
@@ -54,8 +55,14 @@ function authenticateJWT(request, response, next) {
     }
 }
 
+// New function to check if a user exists by ID
+async function getUserById(userId) {
+    return await User.findById(userId).exec();
+}
+
 module.exports = {
     checkPassword,
     createJWT,
-    authenticateJWT
+    authenticateJWT,
+    getUserById
 };
