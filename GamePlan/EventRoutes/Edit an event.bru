@@ -1,21 +1,23 @@
 meta {
   name: Edit an event
   type: http
-  seq: 7
+  seq: 4
 }
 
 patch {
-  url: http://localhost:3000/events/66a5b8ddad2beb815b2bd199
+  url: http://localhost:3000/events/66a63916e4c9260f403e12fe
   body: json
   auth: bearer
 }
 
 auth:bearer {
-  token: tokenplaceholder
+  token: TokenPlaceholder
 }
 
 body:json {
   {
-    "location": "Another house"
+    "location": "Another house",
+    "isPublished": true,
+    "eventDate": "2024-08-02Z00:00:00"
   }
 }
