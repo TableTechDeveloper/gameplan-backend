@@ -23,4 +23,7 @@ app.use("/user", userRoute);
 const eventRoute = require("./controllers/EventRouter");
 app.use("/events", eventRoute);
 
+const gameRoute = require("./controllers/GameRouter");
+app.use("/games", gameRoute)
+
 module.exports = app;
