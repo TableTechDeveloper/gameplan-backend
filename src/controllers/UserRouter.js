@@ -158,9 +158,83 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         });
     } catch (error) {
         console.error("Error retrieving games: ", error);
-        response.status(500).jason({
+        response.status(500).json({
             status: 500,
             message: "Error retrieving games",
+            errors: [error.message]
+        })
+    }
+})
+
+/**
+ * Route to GET a user's game collection filtered by a search query.
+ * Requires the user to be authenticated.
+ */
+router.get("/collection/search", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const query = request.query.query;
+
+        if (!query) {
+            return response.status(400).json({
+                status: 400,
+                message: "Missing search query",
+                errors: ["Search term is required"]
+            });
+        }
+
+        const user = await User.findById(userId).populate("gamesOwned").exec();
+        if (!user) {
+            return response.status(404).json({
+                status: 404,
+                message: "User not found",
+                errors: ["The user is not found or not logged in"]
+            });
+        }
+
+        // Filter gamesOwned by the search query
+        const filteredGames = user.gamesOwned.filter(game =>
+            game.name.toLowerCase().includes(query.toLowerCase())
+        );
+
+        response.status(200).json({
+            status: 200,
+            games: filteredGames
+        });
+    } catch (error) {
+        console.error("Error searching games: ", error);
+        response.status(500).json({
+            status: 500,
+            message: "Error searching games",
+            errors: [error.message]
+        });
+    }
+});
+
+// ROUTE to display all information on user
+router.get("/", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            return response.status(404).json({
+                status: 404,
+                message: "User not found",
+                errors: ["The user is not found or not logged in"]
+            });
+        }
+        response.status(200).json({
+            status: 200,
+            username: user.username,
+            email: user.email,
+            location: user.location,
+            bio: user.bio
+        })
+    } catch (error) {
+        console.error("Error retrieving user: ", error);
+        response.status(500).json({
+            status: 500,
+            message: "Error retrieving user",
             errors: [error.message]
         })
     }

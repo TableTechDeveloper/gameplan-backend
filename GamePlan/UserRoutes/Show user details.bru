@@ -1,21 +1,15 @@
 meta {
-  name: Add game to collection
+  name: Show user details
   type: http
-  seq: 3
+  seq: 5
 }
 
-post {
-  url: http://localhost:3000/games/add
-  body: json
+get {
+  url: http://localhost:3000/user
+  body: none
   auth: bearer
 }
 
 auth:bearer {
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTViNzI0ZDNiMzQ5ODdlMGMwZWI0YSIsImlhdCI6MTcyMjEzNjc1MSwiZXhwIjoxNzIyNzQxNTUxfQ.6zTguMN-j2DVGWcNkaWQobOd-gbwrgTawXocGucXiQU
-}
-
-body:json {
-  {
-    "gameId": "187481"
-  }
 }
