@@ -1,0 +1,21 @@
+meta {
+  name: Edit an event
+  type: http
+  seq: 7
+}
+
+patch {
+  url: http://localhost:3000/events/66a5b8ddad2beb815b2bd199
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTViNzI0ZDNiMzQ5ODdlMGMwZWI0YSIsImlhdCI6MTcyMjE1MjU5MywiZXhwIjoxNzIyNzU3MzkzfQ.7lP_FEPyqHUENBwdv-hW-CfbY1YETfWw03Yg_LrME9I
+}
+
+body:json {
+  {
+    "location": "Another house"
+  }
+}

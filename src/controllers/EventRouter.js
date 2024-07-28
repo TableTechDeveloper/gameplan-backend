@@ -204,4 +204,114 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
     }
 });
 
+// Route to delete an event
+router.delete("/:id", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const eventId = request.params.id;
+        const event = await Event.findById(eventId).exec();
+        // Check if the user is already registered for the event
+        if (!event) {
+            return response.status(404).json({
+                status: 404,
+                message: "Event not found",
+                errors: ["This event does not exist"]
+            })
+        }
+        if (event.host.toString() !== userId) {
+            return response.status(404).json({
+                status: 404,
+                message: "Only the host may perform this action",
+                errors: ["You are not permitted to delete this event"]
+            });
+        }
+        // Remove the event from the participants eventsAttending lists
+        await User.updateMany(
+            { _id: { $in: event.participants } },
+            { $pull: { eventsAttending: eventId } }
+        );
+        // Delete the event
+        await Event.findByIdAndDelete(eventId);
+
+        response.status(200).json({
+            status: 200,
+            message: "Event deleted successfully"
+        })
+    } catch (error) {
+        console.error("Error deleting event: ", error);
+        response.status(500).json({
+            status: 500,
+            message: "Error deleting event",
+            errors: [error.message]
+        })
+    }
+})
+
+/**
+ * Route to PATCH (edit) an event.
+ * Requires the user to be authenticated and be the host of the event.
+ */
+router.patch("/:id", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const eventId = request.params.id;
+
+        // Find the event by ID
+        const event = await Event.findById(eventId).exec();
+
+        // Check if the event exists
+        if (!event) {
+            return response.status(404).json({
+                status: 404,
+                message: "Event not found",
+                errors: ["This event does not exist"]
+            });
+        }
+
+        // Check if the requesting user is the host of the event
+        if (event.host.toString() !== userId) {
+            return response.status(403).json({
+                status: 403,
+                message: "Only the host may perform this action",
+                errors: ["You are not permitted to edit this event"]
+            });
+        }
+
+        // Update the event with new details from the request body
+        const updatedEventDetails = request.body;
+
+        // Ensure required fields are present if the event is being published
+        if (updatedEventDetails.isPublished) {
+            const { title, eventDate, location, maxParticipants, gamelength } = updatedEventDetails;
+            if (!title || !eventDate || !location || !maxParticipants || !gamelength) {
+                return response.status(400).json({
+                    status: 400,
+                    message: "Missing required fields for published event",
+                    errors: ["Title, event date, location, max participants, and game length are required when publishing an event"]
+                });
+            }
+        }
+
+        // Merge the new details into the event document
+        Object.assign(event, updatedEventDetails);
+
+        // Save the updated event
+        await event.save();
+
+        // Send success response
+        response.status(200).json({
+            status: 200,
+            message: "Event updated successfully",
+            event: event
+        });
+    } catch (error) {
+        console.error("Error updating event:", error);
+        response.status(500).json({
+            status: 500,
+            message: "Error updating event",
+            errors: [error.message]
+        });
+    }
+});
+
 module.exports = router;

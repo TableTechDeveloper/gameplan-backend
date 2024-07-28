@@ -27,6 +27,12 @@ const UserSchema = new mongoose.Schema({
         unique: false,
         maxlength: [100, "Location must be at most 100 characters long"]
     },
+    bio: {
+        type: String,
+        required: false,
+        unique: false,
+        maxlength: [100, "Please keep bio under 100 characters long"]
+    },
     gamesOwned: [{
         type: mongoose.Types.ObjectId,
         ref: "Game",
