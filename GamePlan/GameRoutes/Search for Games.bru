@@ -1,20 +1,20 @@
 meta {
   name: Search for Games
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
-  url: http://localhost:3000/games/search?query=Unfair&strict=false
+  url: http://localhost:3000/games/search?query=Backgammon&strict=true
   body: none
   auth: bearer
 }
 
 query {
-  query: Unfair
-  strict: false
+  query: Backgammon
+  strict: true
 }
 
 auth:bearer {
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTYxNzBlZDZmODZhYmI3MGNhNjRmMSIsImlhdCI6MTcyMjE2MDkxMCwiZXhwIjoxNzIyNzY1NzEwfQ.0RGeOlZASZB9avh1nerGt1MbvFz7jbf5JoVDo93msu0
+  token: TokenPlaceholder
 }

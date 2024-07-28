@@ -6,6 +6,7 @@ const { handleValidationError, validatePassword } = require("../utils/validation
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 const bcrypt = require("bcryptjs");
 
+// STATIC ROUTES
 /**
  * Route to POST a new user registering.
  * Requires body to include email, password, username, and (optional) location
@@ -31,7 +32,7 @@ router.post("/register", async (request, response, next) => {
     } catch (error) {
         handleValidationError(error, response);
     }
-});
+}); // TESTED
 
 /**
  * Route to POST an existing user login.
@@ -63,11 +64,71 @@ router.post("/login", async (request, response, next) => {
         console.error("Error logging in:", error);
         next(error);
     }
-});
+}); // TESTED
+
+// ROUTES WITH PARAMETERS
+// Route to display all events user is participating in or hosting based on the filter
+router.get("/events", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const isHosted = request.query.hosted === "true";
+
+        let events;
+
+        if (isHosted) {
+            // Fetch events hosted by the user
+            events = await Event.find({ host: userId }).exec();
+            console.log("Hosted events: ", events);
+        } else {
+            // Fetch events the user is participating in
+            const user = await User.findById(userId).populate("eventsAttending").exec();
+            if (!user) {
+                return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
+            }
+            console.log("User: ", user);
+            console.log("Events Attending: ", user.eventsAttending);
+            events = user.eventsAttending;
+        }
+
+        sendSuccessResponse(response, 200, "Events retrieved successfully", { events });
+    } catch (error) {
+        console.error("Error retrieving events:", error);
+        next(error);
+    }
+}); // TESTED
 
 /**
- * Route to PATCH an existing user's details.
- * Requires the user to be authenticated.
+ * Route to GET a user's game collection with optional search query.
+ * Requires authentication.
+ */
+router.get("/collection", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const query = request.query.search;
+
+        const user = await User.findById(userId).populate("gamesOwned").exec();
+        if (!user) {
+            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
+        }
+
+        let games = user.gamesOwned;
+
+        if (query) {
+            games = games.filter(game =>
+                game.name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+
+        sendSuccessResponse(response, 200, "Games retrieved successfully", { games });
+    } catch (error) {
+        console.error("Error retrieving games:", error);
+        next(error);
+    }
+}); // TESTED
+
+/**
+ * Route to PATCH (update) an existing user's details.
+ * Requires authentication.
  */
 router.patch("/update", authenticateJWT, async (request, response, next) => {
     const userId = request.user.id;
@@ -90,58 +151,16 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
             return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
         }
 
-        sendSuccessResponse(response, 200, "Password has been updated!", { updatedUser });
+        sendSuccessResponse(response, 200, "User details have been updated!", { updatedUser });
     } catch (error) {
         handleValidationError(error, response);
     }
-});
-
-// Route to GET a user's game collection
-router.get("/collection", authenticateJWT, async (request, response, next) => {
-    try {
-        const userId = request.user.id;
-
-        const user = await User.findById(userId).populate("gamesOwned").exec();
-        if (!user) {
-            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
-        }
-        sendSuccessResponse(response, 200, "Games retrieved successfully", { games: user.gamesOwned });
-    } catch (error) {
-        console.error("Error retrieving games:", error);
-        next(error);
-    }
-});
+}); // TESTED
 
 /**
- * Route to GET a user's game collection filtered by a search query.
- * Requires the user to be authenticated.
+ * Route to DELETE a game from the user's collection.
+ * Requires authentication.
  */
-router.get("/collection/search", authenticateJWT, async (request, response, next) => {
-    try {
-        const userId = request.user.id;
-        const query = request.query.query;
-
-        if (!query) {
-            return sendErrorResponse(response, 400, "Missing search query", ["Search term is required"]);
-        }
-
-        const user = await User.findById(userId).populate("gamesOwned").exec();
-        if (!user) {
-            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
-        }
-
-        const filteredGames = user.gamesOwned.filter(game =>
-            game.name.toLowerCase().includes(query.toLowerCase())
-        );
-
-        sendSuccessResponse(response, 200, "Games retrieved successfully", { games: filteredGames });
-    } catch (error) {
-        console.error("Error searching games:", error);
-        next(error);
-    }
-});
-
-// Delete game from user's collection
 router.delete("/collection/:id", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -168,9 +187,34 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         console.error("Error removing game from collection:", error);
         next(error);
     }
-});
+}); // TESTED
 
-// ROUTE to display all information on user
+/**
+ * Route to DELETE the current logged-in user.
+ * Requires authentication.
+ */
+router.delete("/", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
+        }
+
+        await User.findByIdAndDelete(userId);
+        
+        sendSuccessResponse(response, 200, "User deleted successfully", {});
+    } catch (error) {
+        next(error);
+    }
+}); // TESTED
+
+// CATCH-ALL
+
+/**
+ * Route to display all information on the user.
+ * Requires authentication.
+ */
 router.get("/", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -188,50 +232,6 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving user: ", error);
         next(error);
     }
-});
-
-// Route to display all events user is participating in or hosting based on the filter
-router.get("/events", authenticateJWT, async (request, response, next) => {
-    try {
-        const userId = request.user.id;
-        const isHosted = request.query.hosted === "true";
-
-        let events;
-
-        if (isHosted) {
-            // Fetch events hosted by the user
-            events = await Event.find({ host: userId }).exec();
-        } else {
-            // Fetch events the user is participating in
-            const user = await User.findById(userId).populate("eventsAttending").exec();
-            if (!user) {
-                return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
-            }
-            events = user.eventsAttending;
-        }
-
-        sendSuccessResponse(response, 200, "Events retrieved successfully", { events });
-    } catch (error) {
-        console.error("Error retrieving events:", error);
-        next(error);
-    }
-});
-
-// Route to delete the current logged in user
-router.delete("/", authenticateJWT, async (request, response, next) => {
-    try {
-        const userId = request.user.id;
-        const user = await User.findById(userId);
-        if (!user) {
-            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
-        }
-
-        await User.findByIdAndDelete(userId)
-        
-        sendSuccessResponse(response, 200, "User deleted successfully", {});
-    } catch (error) {
-        next(error);
-    }
-})
+}); // TESTED
 
 module.exports = router;

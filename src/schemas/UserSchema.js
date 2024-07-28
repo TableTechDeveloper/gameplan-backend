@@ -1,7 +1,5 @@
-const mongoose = require("mongoose")
-const bcrypt = require("bcryptjs")
+const mongoose = require("mongoose");
 
-// Schema include validation and error handling of input fields
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -44,10 +42,9 @@ const UserSchema = new mongoose.Schema({
         ref: "Event",
         required: false
     }]
-},
-{
+}, {
     timestamps: true
-})
+});
 
 UserSchema.pre("save", async function (next) {
     const user = this;
@@ -58,7 +55,5 @@ UserSchema.pre("save", async function (next) {
     this.password = hash
     next()
 });
-
-
 
 module.exports = UserSchema
