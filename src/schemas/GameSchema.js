@@ -40,4 +40,4 @@ const GameSchema = new mongoose.Schema({
     }
 });
 
-module.exports = GameSchema
+module.exports = GameSchema;
