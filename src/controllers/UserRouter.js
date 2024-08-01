@@ -129,6 +129,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
 /**
  * Route to PATCH (update) an existing user's details.
  * Requires authentication.
+ * NOT FOR PASSWORDS
  */
 router.patch("/update", authenticateJWT, async (request, response, next) => {
     const userId = request.user.id;
@@ -155,7 +156,39 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         handleValidationError(error, response);
     }
-}); // TESTED
+}); // TESTED, NEXT => CHANGE CODE TO DISALLOW PASSWORD PATCHING
+
+/**
+ * Route to PATCH (update) an existing user's details.
+ * Requires authentication.
+ * NOT FOR PASSWORDS
+ */
+router.patch("/password-reset", authenticateJWT, async (request, response, next) => {
+    const userId = request.user.id;
+    const updatedDetails = request.body;
+
+    if (updatedDetails.password) {
+        if (!validatePassword(updatedDetails.password)) {
+            return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
+        }
+        updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
+    }
+
+    try {
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
+            new: true,
+            runValidators: true
+        });
+
+        if (!updatedUser) {
+            return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
+        }
+
+        sendSuccessResponse(response, 200, "User details have been updated!", { updatedUser });
+    } catch (error) {
+        handleValidationError(error, response);
+    }
+}); // UNBUILT, NEXT => PATH TO RESET USER PASSWORD (DO WE USE MAILER?)
 
 /**
  * Route to DELETE a game from the user's collection.
