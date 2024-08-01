@@ -34,10 +34,12 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
         const newEvent = new Event({
             title,
             host: userId,
-            participants: [userId],  // Ensure the host is added as a participant
+            participants: [userId],
             eventDate,
             game,
             location,
+            gameImage: gameDetails.image,
+            gameThumbnail: gameDetails.thumbnail,
             minParticipants: minParticipants || gameDetails.minplayers,
             maxParticipants: maxParticipants || gameDetails.maxplayers,
             gamelength: gamelength || gameDetails.playtime,
@@ -151,6 +153,13 @@ router.patch("/:id", authenticateJWT, async (request, response, next) => {
         }
 
         Object.assign(event, updatedEventDetails);
+        // Fetch the game details and update the gameImage and gameThumbnail
+        const gameDetails = await Game.findById(event.game).exec();
+        if (gameDetails) {
+            event.gameImage = gameDetails.image;
+            event.gameThumbnail = gameDetails.thumbnail
+        }
+        
         await event.save();
 
         sendSuccessResponse(response, 200, "Event updated successfully", { event });
