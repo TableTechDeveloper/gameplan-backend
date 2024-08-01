@@ -16,7 +16,7 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
         const { title, eventDate, game, location, minParticipants, maxParticipants, gamelength, isPublic, isPublished } = request.body;
-
+        
         const user = await User.findById(userId).exec();
         if (!user.gamesOwned.includes(game)) {
             return sendErrorResponse(response, 400, "Game not owned", ["You can only host events with games you own"]);

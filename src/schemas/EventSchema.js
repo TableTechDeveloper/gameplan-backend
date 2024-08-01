@@ -5,7 +5,6 @@ const mongoose = require("mongoose")
 const isPublished = function () {
     return this.isPublished
 }
-
 const EventSchema = new mongoose.Schema({
     title: {
         type: String,
