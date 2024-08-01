@@ -39,6 +39,16 @@ const EventSchema = new mongoose.Schema({
         unique: false,
         required: isPublished
     },
+    gameImage: {
+        type: String,
+        unique: false,
+        required: true
+    },
+    gameThumbnail: {
+        type: String,
+        unique: false,
+        required: true
+    },
     minParticipants: {
         type: Number,
         unique: false,
