@@ -5,6 +5,8 @@ const { createJWT, checkPassword, authenticateJWT } = require("../utils/authHelp
 const { handleValidationError, validatePassword } = require("../utils/validation");
 const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 const bcrypt = require("bcryptjs");
+const sendPasswordResetEmail = require("../utils/passwordReset");
+const crypto = require("crypto");
 
 // STATIC ROUTES
 /**
@@ -77,11 +79,16 @@ router.get("/events", authenticateJWT, async (request, response, next) => {
 
         if (isHosted) {
             // Fetch events hosted by the user
-            events = await Event.find({ host: userId }).exec();
-            console.log("Hosted events: ", events);
+            events = await Event.find({ host: userId }).populate("host", "username email").populate("participants", "username").exec();
         } else {
             // Fetch events the user is participating in
-            const user = await User.findById(userId).populate("eventsAttending").exec();
+            const user = await User.findById(userId).populate({
+                path: "eventsAttending",
+                populate: [
+                    { path: "host", select: "username email" },
+                    { path: "participants", select: "username" }
+                ]
+            }).exec();
             if (!user) {
                 return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
             }
@@ -156,39 +163,74 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         handleValidationError(error, response);
     }
-}); // TESTED, NEXT => CHANGE CODE TO DISALLOW PASSWORD PATCHING
+}); // TESTED
 
 /**
- * Route to PATCH (update) an existing user's details.
- * Requires authentication.
- * NOT FOR PASSWORDS
+ * Route to request a password reset.
+ * Generates a reset token and sends an email with the reset link.
  */
-router.patch("/password-reset", authenticateJWT, async (request, response, next) => {
-    const userId = request.user.id;
-    const updatedDetails = request.body;
-
-    if (updatedDetails.password) {
-        if (!validatePassword(updatedDetails.password)) {
-            return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
-        }
-        updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
-    }
-
+router.post('/password-reset', async (request, response, next) => {
     try {
-        const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
-            new: true,
-            runValidators: true
-        });
+        const { email } = request.body;
 
-        if (!updatedUser) {
-            return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
+        // Find the user by email
+        const user = await User.findOne({ email }).exec();
+        if (!user) {
+            return sendErrorResponse(response, 404, 'User not found', ['No user with that email address exists.']);
         }
 
-        sendSuccessResponse(response, 200, "User details have been updated!", { updatedUser });
+        // Generate a reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        // Set reset token and expiry on user object
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+        // Save the user object
+        await user.save();
+
+        // Send the email
+        sendPasswordResetEmail(user.email, resetToken, request.headers.host, response);
+
+        sendSuccessResponse(response, 200, 'Password reset email sent successfully', {});
     } catch (error) {
-        handleValidationError(error, response);
+        next(error);
     }
-}); // UNBUILT, NEXT => PATH TO RESET USER PASSWORD (DO WE USE MAILER?)
+}); // TESTED, PATH TO RESET USER PASSWORD (DO WE USE MAILER?)
+
+router.post('/reset/:token', async (request, response, next) => {
+    try {
+        const { token } = request.params;
+        const { newPassword } = request.body;
+
+        if (!newPassword) {
+            return sendErrorResponse(response, 400, 'New password is required', ['Please provide a new password.']);
+        }
+
+        if (!validatePassword(newPassword)) {
+            return sendErrorResponse(response, 400, 'Invalid password format', ['Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.']);
+        }
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() } // Check if the token has not expired
+        }).exec();
+
+        if (!user) {
+            return sendErrorResponse(response, 400, 'Invalid or expired token', ['The password reset token is invalid or has expired.']);
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        user.resetPasswordToken = undefined; // Clear the reset token
+        user.resetPasswordExpires = undefined; // Clear the token expiration
+
+        await user.save();
+
+        sendSuccessResponse(response, 200, 'Password has been reset successfully', {});
+    } catch (error) {
+        next(error);
+    }
+});
 
 /**
  * Route to DELETE a game from the user's collection.
@@ -243,7 +285,6 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
 }); // TESTED
 
 // CATCH-ALL
-
 /**
  * Route to display all information on the user.
  * Requires authentication.
@@ -254,7 +295,7 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         const user = await User.findById(userId).exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
-        }
+            }
         sendSuccessResponse(response, 200, "User retrieved successfully", {
             username: user.username,
             email: user.email,
@@ -267,4 +308,4 @@ router.get("/", authenticateJWT, async (request, response, next) => {
     }
 }); // TESTED
 
-module.exports = router;
+module.exports = router

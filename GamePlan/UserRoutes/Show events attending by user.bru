@@ -5,15 +5,15 @@ meta {
 }
 
 get {
-  url: http://localhost:3000/user/events?hosted=true
+  url: http://localhost:3000/user/events?hosted=false
   body: none
   auth: bearer
 }
 
 query {
-  hosted: true
+  hosted: false
 }
 
 auth:bearer {
-  token: JWTGoesHere
+  token: TokenPlaceholder
 }

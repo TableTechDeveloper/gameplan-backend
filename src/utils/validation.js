@@ -36,11 +36,19 @@ function validatePassword(password){
     const regexDigit = /\d/;
     const regexSpecial = /[@$!%*?&]/;
 
-    return regexLength.test(password) &&
-           regexLowercase.test(password) &&
-           regexUppercase.test(password) &&
-           regexDigit.test(password) &&
-           regexSpecial.test(password);
+    // console.log(regexLength.test(password))
+    // console.log(regexLowercase.test(password))
+    // console.log(regexUppercase.test(password))
+    // console.log(regexDigit.test(password))
+    // console.log(regexSpecial.test(password))
+
+    return (
+        regexLength.test(password) &&
+        regexLowercase.test(password) &&
+        regexUppercase.test(password) &&
+        regexDigit.test(password) &&
+        regexSpecial.test(password)
+    )
 }
 
 // Export the function to make it available for import in other files

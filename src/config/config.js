@@ -19,7 +19,9 @@ const config = {
                 return "";
         }
     })(),
-    jwtKey: process.env.JWT_KEY || "default_jwt_key"
+    jwtKey: process.env.JWT_KEY || "default_jwt_key",
+    EMAIL_PASS: process.env.EMAIL_PASS,
+    EMAIL_USER: process.env.EMAIL_USER,
 };
 
 module.exports = config;
