@@ -77,11 +77,16 @@ router.get("/events", authenticateJWT, async (request, response, next) => {
 
         if (isHosted) {
             // Fetch events hosted by the user
-            events = await Event.find({ host: userId }).exec();
-            console.log("Hosted events: ", events);
+            events = await Event.find({ host: userId }).populate("host", "username").populate("participants", "username").exec();
         } else {
             // Fetch events the user is participating in
-            const user = await User.findById(userId).populate("eventsAttending").exec();
+            const user = await User.findById(userId).populate({
+                path: "eventsAttending",
+                populate: [
+                    { path: "host", select: "username" },
+                    { path: "participants", select: "username"}
+                ]
+            }).exec();
             if (!user) {
                 return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
             }

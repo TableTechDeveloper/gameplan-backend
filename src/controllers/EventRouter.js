@@ -102,7 +102,7 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
  */
 router.get("/:id", async (request, response, next) => {
     try {
-        const result = await Event.findById(request.params.id).exec();
+        const result = await Event.findById(request.params.id).populate("host", "username").populate("participants", "username").exec();
         if (!result) {
             return sendErrorResponse(response, 404, "Event not found", ["This event does not exist"]);
         }
