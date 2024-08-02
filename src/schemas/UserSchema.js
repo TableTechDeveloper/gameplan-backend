@@ -42,7 +42,17 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "Event",
         required: false
-    }]
+    }],
+    resetPasswordToken: {
+        type: String,
+        required: false,
+        unique: false
+    },
+    resetPasswordExpires: {
+        type: Date,
+        required: false,
+        unique: false
+    }
 }, {
     timestamps: true
 });
