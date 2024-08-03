@@ -1,17 +1,17 @@
 const nodemailer = require("nodemailer");
 const config = require("../config/config");
-const { sendErrorResponse } = require("./responseHelpers");
+const { sendErrorResponse, sendSuccessResponse } = require("./errorResponseHelpers");
 
 // Configure the transporter
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: config.EMAIL_USER, // your mail.com email address
-        pass: config.EMAIL_PASS // your mail.com password or app password if 2FA is enabled
+        user: config.EMAIL_USER, // your Gmail email address
+        pass: config.EMAIL_PASS // your Gmail password or app password if 2FA is enabled
     }
 });
 
-// Example function to send an email
+// Function to send a password reset email
 const sendPasswordResetEmail = (userEmail, resetToken, host, res) => {
     const mailOptions = {
         from: config.EMAIL_USER,

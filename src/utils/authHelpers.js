@@ -1,12 +1,11 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { jwtKey } = require("../config/config");
-const { User } = require("../models/models");
 
 // Function to confirm if a password input by the user matches the hashed password stored in the database
 async function checkPassword(plaintextPassword, encryptedPassword) {
-    let doPasswordsMatch = false;
     // Compare the plaintext password with the hashed password
+    let doPasswordsMatch = false;
     doPasswordsMatch = await bcrypt.compare(plaintextPassword, encryptedPassword);
     return doPasswordsMatch;
 }
@@ -18,15 +17,17 @@ function createJWT(userId) {
         { id: userId },
         jwtKey,
         {
-            expiresIn: "7d"
+            expiresIn: "7d" // Token expires in 7 days
         }
     );
     return newJwt;
 }
 
+// Middleware to authenticate a JWT
 function authenticateJWT(request, response, next) {
     const authHeader = request.header("Authorization");
 
+    // Check if the Authorization header is provided
     if (!authHeader) {
         return response.status(401).json({
             status: 401,
@@ -36,6 +37,7 @@ function authenticateJWT(request, response, next) {
 
     const token = authHeader.split(" ")[1];
 
+    // Check if the token is provided
     if (!token) {
         return response.status(401).json({
             status: 401,
@@ -44,6 +46,7 @@ function authenticateJWT(request, response, next) {
     }
 
     try {
+        // Verify the token
         const decoded = jwt.verify(token, jwtKey);
         request.user = decoded;
         next();

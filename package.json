@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "NODE_ENV=development nodemon src/index.js",
-    "seed": "NODE_ENV=development node src/utils/seed.js"
+    "seed": "NODE_ENV=development node src/utils/seeddb.js"
   },
   "keywords": [],
   "author": "",

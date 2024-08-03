@@ -2,8 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { databaseURL } = require("./config/config");
-const { errorHandler } = require("./utils/errorHandler");
-const { sendErrorResponse } = require("./utils/responseHelpers");
+const { errorHandler, sendErrorResponse } = require("./utils/_utils");
 
 const app = express();
 

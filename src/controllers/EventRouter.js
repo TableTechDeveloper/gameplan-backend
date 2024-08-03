@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { Event, User, Game } = require("../models/models");
-const { authenticateJWT } = require("../utils/authHelpers");
-const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
+const { authenticateJWT, sendErrorResponse, sendSuccessResponse } = require("../utils/_utils");
 
-// STATIC ROUTES
+// STATIC ROUTES //
 
-// ROUTES WITH PARAMETERS
+// ROUTES WITH PARAMETERS//
 
 /**
  * Route to POST (create) a new event.
@@ -15,22 +14,34 @@ const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHel
 router.post("/new", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
-        const { title, eventDate, game, location, minParticipants, maxParticipants, gamelength, isPublic, isPublished } = request.body;
-        
+        const { 
+            title, 
+            eventDate, 
+            game, 
+            location, 
+            minParticipants, 
+            maxParticipants, 
+            gamelength, 
+            isPublic, 
+            isPublished 
+        } = request.body;
+
         const user = await User.findById(userId).exec();
+        // User can only add game to event if they own it first
         if (!user.gamesOwned.includes(game)) {
             return sendErrorResponse(response, 400, "Game not owned", ["You can only host events with games you own"]);
         }
-
+        // Find game in db
         const gameDetails = await Game.findById(game).exec();
         if (!gameDetails) {
             return sendErrorResponse(response, 400, "Game not found", ["The specified game does not exist"]);
         }
-
-        if (isPublished && (!title || !eventDate || !location || !maxParticipants || !gamelength)) {
-            return sendErrorResponse(response, 400, "Missing required fields for published event", ["Title, event date, location, max participants, and game length are required when publishing an event"]);
+        // if the event is published, then ensure the title, eventDate and location have been captured
+        if (isPublished && (!title || !eventDate || !location)) {
+            return sendErrorResponse(response, 400, "Missing required fields for published event", ["Title, event date, location, min participants, max participants, and game length are required when publishing an event"]);
         }
 
+        // create the event
         const newEvent = new Event({
             title,
             host: userId,
@@ -38,17 +49,17 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
             eventDate,
             game,
             location,
-            gameImage: gameDetails.image,
-            gameThumbnail: gameDetails.thumbnail,
-            minParticipants: minParticipants || gameDetails.minplayers,
-            maxParticipants: maxParticipants || gameDetails.maxplayers,
-            gamelength: gamelength || gameDetails.playtime,
+            gameImage: gameDetails.image, // gameImage will always populate from the game
+            gameThumbnail: gameDetails.thumbnail, // gameThumbnail will always populate from the game
+            minParticipants: minParticipants || gameDetails.minplayers, // minParticipants can be declared, or will default from the game info
+            maxParticipants: maxParticipants || gameDetails.maxplayers, // maxParticipants can be declared, or will default from the game info
+            gamelength: gamelength || gameDetails.playtime, // gameLength can be declared, or will default from the game info
             isPublic: isPublished ? isPublic : false,
             isPublished
         });
-
+        // save the event to db
         await newEvent.save();
-
+        // add the event to the host's "eventsAttending" list
         user.eventsAttending.push(newEvent._id);
         await user.save();
 
@@ -67,25 +78,31 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
         const userId = request.user.id;
         const eventId = request.params.id;
 
+        // check that the event is in db
         const event = await Event.findById(eventId).exec();
         if (!event) {
             return sendErrorResponse(response, 404, "Event not found", ["This event does not exist"]);
         }
 
+        // check that user is in db
         const user = await User.findById(userId).exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
         }
 
+        // check is user is already a participant (NOTE: host is also a participant)
         if (event.participants.includes(userId)) {
             return sendErrorResponse(response, 400, "User already registered for this event", ["You are already registered for this event"]);
         }
 
+        // check that the number of participants is less than the max participants
         if (event.participants.length >= event.maxParticipants) {
             return sendErrorResponse(response, 400, "This event is full", ["Sorry, this event is currently full, please find another event or try again later."]);
         }
 
+        // add the user to the event
         event.participants.push(userId);
+        // add the event to the user
         user.eventsAttending.push(eventId);
 
         await event.save();
@@ -100,9 +117,22 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
 /**
  * Route to GET and display an event when given an ID.
  */
-router.get("/:id", async (request, response, next) => {
+router.get("/:id", authenticateJWT, async (request, response, next) => {
     try {
-        const result = await Event.findById(request.params.id).populate("host", "username").populate("participants", "username").exec();
+        const userId = request.user.id;
+        // check that user is in db
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
+        }
+
+        // get the event that matches the id in the url 
+        const result = await Event.findById(request.params.id)
+        .populate("host", "username") // add the username of the host along with the id
+        .populate("participants", "username") // add the username(s) of the participants along with the id
+        .exec();
+
+        // check if the event exists
         if (!result) {
             return sendErrorResponse(response, 404, "Event not found", ["This event does not exist"]);
         }
@@ -120,14 +150,17 @@ router.patch("/:id", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
         const eventId = request.params.id;
+        // get the event that matches the id in the url 
         const event = await Event.findById(eventId).exec();
+        // check that event is in db
         if (!event) {
             return sendErrorResponse(response, 404, "Event not found", ["This event does not exist"]);
         }
+        // check if the logged in user is the host
         if (event.host.toString() !== userId) {
             return sendErrorResponse(response, 403, "Only the host may perform this action", ["You are not permitted to edit this event"]);
         }
-
+        
         const updatedEventDetails = request.body;
 
         // Check for required fields if the event is being published
@@ -177,14 +210,17 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
         const userId = request.user.id;
         const eventId = request.params.id;
         const event = await Event.findById(eventId).exec();
+        // check that event is in db
         if (!event) {
             return sendErrorResponse(response, 404, "Event not found", ["This event does not exist"]);
         }
+        // check if the logged in user is the host
         if (event.host.toString() !== userId) {
-            return sendErrorResponse(response, 404, "Only the host may perform this action", ["You are not permitted to delete this event"]);
+            return sendErrorResponse(response, 403, "Only the host may perform this action", ["You are not permitted to delete this event"]);
         }
-
+        // remove the event from each user in db
         await User.updateMany({ _id: { $in: event.participants } }, { $pull: { eventsAttending: eventId } });
+        // remove event from db
         await Event.findByIdAndDelete(eventId);
 
         sendSuccessResponse(response, 200, "Event deleted successfully", {});
@@ -200,7 +236,10 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
  */
 router.get("/", async (request, response, next) => {
     try {
-        const foundEvents = await Event.find({ isPublic: true, isPublished: true }).exec();
+        const foundEvents = await Event.find({ isPublic: true, isPublished: true })
+        .populate("host", "username") // add the username of the host along with the id
+        .populate("participants", "username") // add the username(s) of the participants along with the id
+        .exec();
         sendSuccessResponse(response, 200, "Events retrieved successfully", { foundEvents });
     } catch (error) {
         next(error);

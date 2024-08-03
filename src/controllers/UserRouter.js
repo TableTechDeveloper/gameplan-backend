@@ -1,16 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const { User, Game, Event } = require("../models/models");
-const { createJWT, checkPassword, authenticateJWT } = require("../utils/authHelpers");
-const { handleValidationError, validatePassword } = require("../utils/validation");
-const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
+const { createJWT, checkPassword, authenticateJWT, handleValidationError, validatePassword, sendErrorResponse, sendSuccessResponse, sendPasswordResetEmail } = require("../utils/_utils");
 const bcrypt = require("bcryptjs");
-const sendPasswordResetEmail = require("../utils/passwordReset");
 const crypto = require("crypto");
 
-// STATIC ROUTES
+// STATIC ROUTES //
+
 /**
- * Route to POST a new user registering.
+ * Route to POST (register) a new user.
  * Requires body to include email, password, username, and (optional) location
  */
 router.post("/register", async (request, response, next) => {
@@ -23,42 +21,50 @@ router.post("/register", async (request, response, next) => {
         location
     });
 
+    // Validate the password format
     if (!validatePassword(password)) {
         return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
     }
 
     try {
+        // Save the new user to the database
         await newUser.save();
-        const token = createJWT(newUser._id);
-        sendSuccessResponse(response, 201, "User registered successfully", { token, user: newUser });
+        // Create a JWT for the new user
+        const jwt = createJWT(newUser._id);
+        sendSuccessResponse(response, 201, "User registered successfully", { jwt, user: newUser });
     } catch (error) {
+        // Handle validation errors
         handleValidationError(error, response);
     }
 }); // TESTED
 
 /**
- * Route to POST an existing user login.
+ * Route to POST (login) an existing user.
  * Requires body to include username and password
  */
 router.post("/login", async (request, response, next) => {
     const { username, password } = request.body;
 
+    // Check if username and password are provided
     if (!username || !password) {
         return sendErrorResponse(response, 400, "Missing login details", ["Username and password are required"]);
     }
 
     try {
+        // Find the user by username
         const foundUser = await User.findOne({ username }).exec();
 
         if (!foundUser) {
             return sendErrorResponse(response, 404, "User not found", ["This username does not exist"]);
         }
 
+        // Check if the provided password is correct
         const isPasswordCorrect = await checkPassword(password, foundUser.password);
 
         if (isPasswordCorrect) {
-            const newJwt = createJWT(foundUser._id);
-            sendSuccessResponse(response, 200, `${foundUser.username} has logged in!`, { jwt: newJwt, user: foundUser });
+            // Create a JWT for the logged-in user
+            const jwt = createJWT(foundUser._id);
+            sendSuccessResponse(response, 200, `${foundUser.username} has logged in!`, { jwt: jwt, user: foundUser });
         } else {
             return sendErrorResponse(response, 401, "Incorrect password", ["The password you entered is incorrect"]);
         }
@@ -68,8 +74,12 @@ router.post("/login", async (request, response, next) => {
     }
 }); // TESTED
 
-// ROUTES WITH PARAMETERS
-// Route to display all events user is participating in or hosting based on the filter
+// ROUTES WITH PARAMETERS //
+
+/**
+ * Route to GET (display) all events user is participating in or hosting based on the filter.
+ * Requires authentication.
+ */
 router.get("/events", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -113,6 +123,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         const userId = request.user.id;
         const query = request.query.search;
 
+        // Find the user and populate the gamesOwned field
         const user = await User.findById(userId).populate("gamesOwned").exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
@@ -120,6 +131,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
 
         let games = user.gamesOwned;
 
+        // Filter games by search query if provided
         if (query) {
             games = games.filter(game =>
                 game.name.toLowerCase().includes(query.toLowerCase())
@@ -142,6 +154,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     const userId = request.user.id;
     const updatedDetails = request.body;
 
+    // If the password is being updated, validate and hash it
     if (updatedDetails.password) {
         if (!validatePassword(updatedDetails.password)) {
             return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
@@ -150,6 +163,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     }
 
     try {
+        // Update the user details in the database
         const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
             new: true,
             runValidators: true
@@ -166,7 +180,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
 }); // TESTED
 
 /**
- * Route to request a password reset.
+ * Route to POST (request) a password reset.
  * Generates a reset token and sends an email with the reset link.
  */
 router.post('/password-reset', async (request, response, next) => {
@@ -186,23 +200,27 @@ router.post('/password-reset', async (request, response, next) => {
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
-        // Save the user object
+        // Save the user object with the reset token
         await user.save();
 
-        // Send the email
+        // Send the email with the reset link
         sendPasswordResetEmail(user.email, resetToken, request.headers.host, response);
 
         sendSuccessResponse(response, 200, 'Password reset email sent successfully', {});
     } catch (error) {
         next(error);
     }
-}); // TESTED, PATH TO RESET USER PASSWORD (DO WE USE MAILER?)
+}); // TESTED
 
+/**
+ * Route to POST (reset) password using a token.
+ */
 router.post('/reset/:token', async (request, response, next) => {
     try {
         const { token } = request.params;
         const { newPassword } = request.body;
 
+        // Check if new password is provided and valid
         if (!newPassword) {
             return sendErrorResponse(response, 400, 'New password is required', ['Please provide a new password.']);
         }
@@ -211,6 +229,7 @@ router.post('/reset/:token', async (request, response, next) => {
             return sendErrorResponse(response, 400, 'Invalid password format', ['Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.']);
         }
 
+        // Find the user by the reset token and check if the token has not expired
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() } // Check if the token has not expired
@@ -220,6 +239,7 @@ router.post('/reset/:token', async (request, response, next) => {
             return sendErrorResponse(response, 400, 'Invalid or expired token', ['The password reset token is invalid or has expired.']);
         }
 
+        // Update the user's password and clear the reset token and expiry
         user.password = await bcrypt.hash(newPassword, 10);
         user.resetPasswordToken = undefined; // Clear the reset token
         user.resetPasswordExpires = undefined; // Clear the token expiration
@@ -230,7 +250,7 @@ router.post('/reset/:token', async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-});
+}); // TESTED
 
 /**
  * Route to DELETE a game from the user's collection.
@@ -240,20 +260,26 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
     try {
         const userId = request.user.id;
         const gameId = request.params.id;
+        
+        // Find the game by ID
         const game = await Game.findById(gameId).exec();
         if (!game) {
             return sendErrorResponse(response, 404, "Game not found", ["This game does not exist"]);
         }
+        
+        // Find the user by ID
         const user = await User.findById(userId).exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
         }
 
+        // Check if the game is in the user's collection
         const gameInCollection = user.gamesOwned.indexOf(gameId);
         if (gameInCollection === -1) {
             return sendErrorResponse(response, 400, "Game not in collection", ["The specified game is not in the user's collection"]);
         }
 
+        // Remove the game from the user's collection
         user.gamesOwned.splice(gameInCollection, 1);
         await user.save();
 
@@ -271,11 +297,14 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
 router.delete("/", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
+
+        // Find the user by ID
         const user = await User.findById(userId);
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
         }
 
+        // Delete the user from the database
         await User.findByIdAndDelete(userId);
         
         sendSuccessResponse(response, 200, "User deleted successfully", {});
@@ -284,18 +313,23 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
     }
 }); // TESTED
 
-// CATCH-ALL
+// CATCH-ALL //
+
 /**
- * Route to display all information on the user.
+ * Route to GET and display all information on the user.
  * Requires authentication.
  */
 router.get("/", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
+
+        // Find the user by ID
         const user = await User.findById(userId).exec();
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
-            }
+        }
+        
+        // Send the user's details in the response
         sendSuccessResponse(response, 200, "User retrieved successfully", {
             username: user.username,
             email: user.email,
@@ -308,4 +342,4 @@ router.get("/", authenticateJWT, async (request, response, next) => {
     }
 }); // TESTED
 
-module.exports = router
+module.exports = router;

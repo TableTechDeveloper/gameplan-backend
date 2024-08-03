@@ -29,6 +29,7 @@ function handleValidationError(error, response) {
     }
 }
 
+// Function to validate the strength of a password
 function validatePassword(password){
     const regexLength = /^.{8,16}$/;
     const regexLowercase = /[a-z]/;
@@ -36,12 +37,7 @@ function validatePassword(password){
     const regexDigit = /\d/;
     const regexSpecial = /[@$!%*?&]/;
 
-    // console.log(regexLength.test(password))
-    // console.log(regexLowercase.test(password))
-    // console.log(regexUppercase.test(password))
-    // console.log(regexDigit.test(password))
-    // console.log(regexSpecial.test(password))
-
+    // Check if the password meets all the criteria
     return (
         regexLength.test(password) &&
         regexLowercase.test(password) &&
@@ -51,7 +47,7 @@ function validatePassword(password){
     )
 }
 
-// Export the function to make it available for import in other files
+// Export the functions to make them available for import in other files
 module.exports = {
     handleValidationError,
     validatePassword
