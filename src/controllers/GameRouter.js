@@ -1,22 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const { authenticateJWT } = require("../utils/authHelpers");
-const { searchForSingleGame, searchForMultipleGames, fetchBoardGameData } = require("../utils/boardgamegeekApi");
+const { authenticateJWT, searchForSingleGame, searchForMultipleGames, fetchBoardGameData, sendErrorResponse, sendSuccessResponse } = require("../utils/_utils");
 const { User, Game } = require("../models/models");
-const { sendErrorResponse, sendSuccessResponse } = require("../utils/responseHelpers");
 
-// STATIC ROUTES
+// STATIC ROUTES //
 
-// ROUTES WITH PARAMETERS
+// ROUTES WITH PARAMETERS //
 
 /**
- * Route to add a game to the user's collection.
+ * Route to POST (add) a game to the user's collection.
  * Requires authentication.
  */
 router.post("/add", authenticateJWT, async (request, response, next) => {
     const userId = request.user.id;
     const { gameId } = request.body;
 
+    // Check if gameId is provided in the request body
     if (!gameId) {
         return sendErrorResponse(response, 400, "Missing game ID", ["Game ID is required"]);
     }
@@ -67,22 +66,26 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
 }); // TESTED
 
 /**
- * Route to search for games.
+ * Route to GET (search for) games.
  * Requires authentication.
  */
 router.get("/search", authenticateJWT, async (request, response, next) => {
     const { query, strict } = request.query;
 
+    // Check if search query is provided
     if (!query) {
         return sendErrorResponse(response, 400, "Missing search query", ["Search terms are required"]);
     }
     try {
         let gameData;
+        // Search for a single game if strict mode is enabled, otherwise search for multiple games
         if (strict === "true") {
             gameData = await searchForSingleGame(query);
         } else {
             gameData = await searchForMultipleGames(query);
         }
+
+        // Check if any games were found
         if (!gameData || gameData.length === 0) {
             return sendErrorResponse(response, 404, "No games found", ["No games match the search query"]);
         }
@@ -93,13 +96,14 @@ router.get("/search", authenticateJWT, async (request, response, next) => {
 }); // TESTED
 
 /**
- * Route to fetch detailed game data by ID.
+ * Route to GET (fetch detailed) game data by ID.
  * Requires authentication.
  */
 router.get("/:id", authenticateJWT, async (request, response, next) => {
     const gameId = request.params.id;
 
     try {
+        // Fetch detailed game data from the BoardGameGeek API
         const gameData = await fetchBoardGameData(`https://boardgamegeek.com/xmlapi/boardgame/${gameId}`);
         if (!gameData) {
             return sendErrorResponse(response, 404, "Game not found", ["The specified game does not exist"]);
@@ -111,6 +115,6 @@ router.get("/:id", authenticateJWT, async (request, response, next) => {
     }
 }); // TESTED
 
-// CATCH-ALL
+// CATCH-ALL //
 
 module.exports = router;

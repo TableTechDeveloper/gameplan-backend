@@ -15,16 +15,38 @@ function handleAxiosError(error) {
     console.error("Config:", error.config);
 }
 
+// Middleware to handle general errors in the application
 function errorHandler(error, request, response, next) {
     console.error(error.stack);
     response.status(500).json({
         status: 500,
         message: "Internal Server Error",
         errors: [error.message]
-    })
+    });
 }
 
+// Function to send an error response with a given status, message, and errors
+function sendErrorResponse(response, status, message, errors) {
+    response.status(status).json({
+        status: status, // HTTP status code
+        message: message, // Error message
+        errors: errors // Array of error details
+    });
+}
+
+// Function to send a success response with a given status, message, and data
+function sendSuccessResponse(response, status, message, data) {
+    response.status(status).json({
+        status: status, // HTTP status code
+        message: message, // Success message
+        ...data // Additional data to include in the response
+    });
+}
+
+// Export the functions
 module.exports = {
     handleAxiosError,
-    errorHandler
+    errorHandler,
+    sendErrorResponse,
+    sendSuccessResponse
 };

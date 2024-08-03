@@ -6,6 +6,7 @@ dotenv.config();
 const config = {
     HOST: process.env.HOST || "localhost",
     PORT: process.env.PORT || 3000,
+    // Detrmine which environment to use for db
     databaseURL: (() => {
         switch (process.env.NODE_ENV.toLowerCase()) {
             case "test":
