@@ -1,23 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { User, Game, Event } = require("../models/models");
-<<<<<<< Updated upstream
 const { createJWT, checkPassword, authenticateJWT, handleValidationError, validatePassword, sendErrorResponse, sendSuccessResponse, sendPasswordResetEmail } = require("../utils/_utils");
-=======
-const {
-  createJWT,
-  checkPassword,
-  authenticateJWT,
-} = require("../utils/authHelpers");
-const {
-  handleValidationError,
-  validatePassword,
-} = require("../utils/validation");
-const {
-  sendErrorResponse,
-  sendSuccessResponse,
-} = require("../utils/responseHelpers");
->>>>>>> Stashed changes
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
@@ -28,31 +12,14 @@ const crypto = require("crypto");
  * Requires body to include email, password, username, and (optional) location
  */
 router.post("/register", async (request, response, next) => {
-  const { email, password, username, location } = request.body;
+    const { email, password, username, location } = request.body;
 
-  const newUser = new User({
-    email,
-    password,
-    username,
-    location,
-  });
-
-  if (!validatePassword(password)) {
-    return sendErrorResponse(
-      response,
-      400,
-      "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character."
-    );
-  }
-
-  try {
-    await newUser.save();
-    const token = createJWT(newUser._id);
-    sendSuccessResponse(response, 201, "User registered successfully", {
-      token,
-      user: newUser,
+    const newUser = new User({
+        email,
+        password,
+        username,
+        location
     });
-<<<<<<< Updated upstream
 
     // Validate the password format
     if (!validatePassword(password)) {
@@ -69,11 +36,6 @@ router.post("/register", async (request, response, next) => {
         // Handle validation errors
         handleValidationError(error, response);
     }
-=======
-  } catch (error) {
-    handleValidationError(error, response);
-  }
->>>>>>> Stashed changes
 }); // TESTED
 
 /**
@@ -81,9 +43,8 @@ router.post("/register", async (request, response, next) => {
  * Requires body to include username and password
  */
 router.post("/login", async (request, response, next) => {
-  const { username, password } = request.body;
+    const { username, password } = request.body;
 
-<<<<<<< Updated upstream
     // Check if username and password are provided
     if (!username || !password) {
         return sendErrorResponse(response, 400, "Missing login details", ["Username and password are required"]);
@@ -110,42 +71,7 @@ router.post("/login", async (request, response, next) => {
     } catch (error) {
         console.error("Error logging in:", error);
         next(error);
-=======
-  if (!username || !password) {
-    return sendErrorResponse(response, 400, "Missing login details", [
-      "Username and password are required",
-    ]);
-  }
-
-  try {
-    const foundUser = await User.findOne({ username }).exec();
-
-    if (!foundUser) {
-      return sendErrorResponse(response, 404, "User not found", [
-        "This username does not exist",
-      ]);
     }
-
-    const isPasswordCorrect = await checkPassword(password, foundUser.password);
-
-    if (isPasswordCorrect) {
-      const newJwt = createJWT(foundUser._id);
-      sendSuccessResponse(
-        response,
-        200,
-        `${foundUser.username} has logged in!`,
-        { jwt: newJwt, user: foundUser }
-      );
-    } else {
-      return sendErrorResponse(response, 401, "Incorrect password", [
-        "The password you entered is incorrect",
-      ]);
->>>>>>> Stashed changes
-    }
-  } catch (error) {
-    console.error("Error logging in:", error);
-    next(error);
-  }
 }); // TESTED
 
 // ROUTES WITH PARAMETERS //
@@ -155,13 +81,12 @@ router.post("/login", async (request, response, next) => {
  * Requires authentication.
  */
 router.get("/events", authenticateJWT, async (request, response, next) => {
-  try {
-    const userId = request.user.id;
-    const isHosted = request.query.hosted === "true";
+    try {
+        const userId = request.user.id;
+        const isHosted = request.query.hosted === "true";
 
-    let events;
+        let events;
 
-<<<<<<< Updated upstream
         if (isHosted) {
             // Fetch events hosted by the user
             events = await Event.find({ host: userId }).populate("host", "username email").populate("participants", "username").exec();
@@ -186,34 +111,7 @@ router.get("/events", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         console.error("Error retrieving events:", error);
         next(error);
-=======
-    if (isHosted) {
-      // Fetch events hosted by the user
-      events = await Event.find({ host: userId }).exec();
-      console.log("Hosted events: ", events);
-    } else {
-      // Fetch events the user is participating in
-      const user = await User.findById(userId)
-        .populate("eventsAttending")
-        .exec();
-      if (!user) {
-        return sendErrorResponse(response, 404, "User not found", [
-          "The user is not found or not logged in",
-        ]);
-      }
-      console.log("User: ", user);
-      console.log("Events Attending: ", user.eventsAttending);
-      events = user.eventsAttending;
->>>>>>> Stashed changes
     }
-
-    sendSuccessResponse(response, 200, "Events retrieved successfully", {
-      events,
-    });
-  } catch (error) {
-    console.error("Error retrieving events:", error);
-    next(error);
-  }
 }); // TESTED
 
 /**
@@ -221,11 +119,10 @@ router.get("/events", authenticateJWT, async (request, response, next) => {
  * Requires authentication.
  */
 router.get("/collection", authenticateJWT, async (request, response, next) => {
-  try {
-    const userId = request.user.id;
-    const query = request.query.search;
+    try {
+        const userId = request.user.id;
+        const query = request.query.search;
 
-<<<<<<< Updated upstream
         // Find the user and populate the gamesOwned field
         const user = await User.findById(userId).populate("gamesOwned").exec();
         if (!user) {
@@ -245,30 +142,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         console.error("Error retrieving games:", error);
         next(error);
-=======
-    const user = await User.findById(userId).populate("gamesOwned").exec();
-    if (!user) {
-      return sendErrorResponse(response, 404, "User not found", [
-        "The user is not found or not logged in",
-      ]);
->>>>>>> Stashed changes
     }
-
-    let games = user.gamesOwned;
-
-    if (query) {
-      games = games.filter((game) =>
-        game.name.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-
-    sendSuccessResponse(response, 200, "Games retrieved successfully", {
-      games,
-    });
-  } catch (error) {
-    console.error("Error retrieving games:", error);
-    next(error);
-  }
 }); // TESTED
 
 /**
@@ -277,10 +151,9 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
  * NOT FOR PASSWORDS
  */
 router.patch("/update", authenticateJWT, async (request, response, next) => {
-  const userId = request.user.id;
-  const updatedDetails = request.body;
+    const userId = request.user.id;
+    const updatedDetails = request.body;
 
-<<<<<<< Updated upstream
     // If the password is being updated, validate and hash it
     if (updatedDetails.password) {
         if (!validatePassword(updatedDetails.password)) {
@@ -305,44 +178,11 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
         handleValidationError(error, response);
     }
 }); // TESTED
-=======
-  if (updatedDetails.password) {
-    if (!validatePassword(updatedDetails.password)) {
-      return sendErrorResponse(
-        response,
-        400,
-        "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character."
-      );
-    }
-    updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
-  }
-
-  try {
-    const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!updatedUser) {
-      return sendErrorResponse(response, 404, "User not found", [
-        "This user does not exist",
-      ]);
-    }
-
-    sendSuccessResponse(response, 200, "User details have been updated!", {
-      updatedUser,
-    });
-  } catch (error) {
-    handleValidationError(error, response);
-  }
-}); // TESTED, NEXT => CHANGE CODE TO DISALLOW PASSWORD PATCHING
->>>>>>> Stashed changes
 
 /**
  * Route to POST (request) a password reset.
  * Generates a reset token and sends an email with the reset link.
  */
-<<<<<<< Updated upstream
 router.post('/password-reset', async (request, response, next) => {
     try {
         const { email } = request.body;
@@ -411,57 +251,13 @@ router.post('/reset/:token', async (request, response, next) => {
         next(error);
     }
 }); // TESTED
-=======
-router.patch(
-  "/password-reset",
-  authenticateJWT,
-  async (request, response, next) => {
-    const userId = request.user.id;
-    const updatedDetails = request.body;
-
-    if (updatedDetails.password) {
-      if (!validatePassword(updatedDetails.password)) {
-        return sendErrorResponse(
-          response,
-          400,
-          "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character."
-        );
-      }
-      updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
-    }
-
-    try {
-      const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
-        new: true,
-        runValidators: true,
-      });
-
-      if (!updatedUser) {
-        return sendErrorResponse(response, 404, "User not found", [
-          "This user does not exist",
-        ]);
-      }
-
-      sendSuccessResponse(response, 200, "User details have been updated!", {
-        updatedUser,
-      });
-    } catch (error) {
-      handleValidationError(error, response);
-    }
-  }
-); // UNBUILT, NEXT => PATH TO RESET USER PASSWORD (DO WE USE MAILER?)
->>>>>>> Stashed changes
 
 /**
  * Route to DELETE a game from the user's collection.
  * Requires authentication.
  */
-router.delete(
-  "/collection/:id",
-  authenticateJWT,
-  async (request, response, next) => {
+router.delete("/collection/:id", authenticateJWT, async (request, response, next) => {
     try {
-<<<<<<< Updated upstream
         const userId = request.user.id;
         const gameId = request.params.id;
         
@@ -486,52 +282,19 @@ router.delete(
         // Remove the game from the user's collection
         user.gamesOwned.splice(gameInCollection, 1);
         await user.save();
-=======
-      const userId = request.user.id;
-      const gameId = request.params.id;
-      const game = await Game.findById(gameId).exec();
-      if (!game) {
-        return sendErrorResponse(response, 404, "Game not found", [
-          "This game does not exist",
-        ]);
-      }
-      const user = await User.findById(userId).exec();
-      if (!user) {
-        return sendErrorResponse(response, 404, "User not found", [
-          "The user is not found or not logged in",
-        ]);
-      }
 
-      const gameInCollection = user.gamesOwned.indexOf(gameId);
-      if (gameInCollection === -1) {
-        return sendErrorResponse(response, 400, "Game not in collection", [
-          "The specified game is not in the user's collection",
-        ]);
-      }
-
-      user.gamesOwned.splice(gameInCollection, 1);
-      await user.save();
->>>>>>> Stashed changes
-
-      sendSuccessResponse(
-        response,
-        200,
-        `Game: ${game.name} has been removed from ${user.username}'s collection successfully`,
-        {}
-      );
+        sendSuccessResponse(response, 200, `Game: ${game.name} has been removed from ${user.username}'s collection successfully`, {});
     } catch (error) {
-      console.error("Error removing game from collection:", error);
-      next(error);
+        console.error("Error removing game from collection:", error);
+        next(error);
     }
-  }
-); // TESTED
+}); // TESTED
 
 /**
  * Route to DELETE the current logged-in user.
  * Requires authentication.
  */
 router.delete("/", authenticateJWT, async (request, response, next) => {
-<<<<<<< Updated upstream
     try {
         const userId = request.user.id;
 
@@ -547,23 +310,7 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
         sendSuccessResponse(response, 200, "User deleted successfully", {});
     } catch (error) {
         next(error);
-=======
-  try {
-    const userId = request.user.id;
-    const user = await User.findById(userId);
-    if (!user) {
-      return sendErrorResponse(response, 404, "User not found", [
-        "The user is not found or not logged in",
-      ]);
->>>>>>> Stashed changes
     }
-
-    await User.findByIdAndDelete(userId);
-
-    sendSuccessResponse(response, 200, "User deleted successfully", {});
-  } catch (error) {
-    next(error);
-  }
 }); // TESTED
 
 // CATCH-ALL //
@@ -573,7 +320,6 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
  * Requires authentication.
  */
 router.get("/", authenticateJWT, async (request, response, next) => {
-<<<<<<< Updated upstream
     try {
         const userId = request.user.id;
 
@@ -593,26 +339,7 @@ router.get("/", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         console.error("Error retrieving user: ", error);
         next(error);
-=======
-  try {
-    const userId = request.user.id;
-    const user = await User.findById(userId).exec();
-    if (!user) {
-      return sendErrorResponse(response, 404, "User not found", [
-        "The user is not found or not logged in",
-      ]);
->>>>>>> Stashed changes
     }
-    sendSuccessResponse(response, 200, "User retrieved successfully", {
-      username: user.username,
-      email: user.email,
-      location: user.location,
-      bio: user.bio,
-    });
-  } catch (error) {
-    console.error("Error retrieving user: ", error);
-    next(error);
-  }
 }); // TESTED
 
 module.exports = router;
