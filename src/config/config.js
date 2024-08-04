@@ -22,6 +22,7 @@ const config = {
     jwtKey: process.env.JWT_KEY || "default_jwt_key",
     EMAIL_PASS: process.env.EMAIL_PASS,
     EMAIL_USER: process.env.EMAIL_USER,
+  HOST: process.env.HOST || "0.0.0.0",
 };
 
 module.exports = config;
