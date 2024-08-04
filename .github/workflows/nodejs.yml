@@ -1,5 +1,6 @@
-name: Node.js CI
+name: Node.js Server route testing
 run-name: ${{ github.actor }} is testing the server routes
+
 on:
   push:
     branches:
@@ -9,25 +10,22 @@ on:
       - main
 
 jobs:
-  build:
-
+  servertest:
+    name: Install project and run tests
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [14, 16]
-
     steps:
-      - name: Checkout repository
+      - name: Clone Repo
         uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
 
       - name: Run tests
         run: npm test
+        env:
+          CI: true

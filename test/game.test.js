@@ -1,8 +1,5 @@
-// test/game.test.js
-
-// Import the necessary modules
 const request = require('supertest');
-const app = require('../src/server'); // Adjust the path as necessary
+const app = require('../src/server');
 const mongoose = require('mongoose');
 const { User, Game } = require('../src/models/models');
 
