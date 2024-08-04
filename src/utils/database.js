@@ -52,9 +52,9 @@ async function seedGames() {
 async function seedUsers(gameIDs) {
     let userData = [
         {
-            email: "dilloncotter@gmail.com",
-            password: "Execute@rder66",
-            username: "Dilbot-Cot",
+            email: "test@example.com",
+            password: "Test@1234",
+            username: "Test1234",
             location: "123 Fake Street, Geelong, VIC, 3220, AUS",
             gamesOwned: gameIDs
         }
