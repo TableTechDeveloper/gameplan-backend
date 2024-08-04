@@ -25,7 +25,7 @@ async function databaseClear() {
 async function seedGames() {
     const gameIDs = [];
     // List of BoardGameGeek IDs for the games to seed
-    const seedIDs = [234931, 149296, 15045, 151347, 150376, 164153, 124742, 175324, 185104, 18901, 233078, 141430, 163745, 1931, 2452, 1917, 320, 4864, 1294, 15046, 71921, 312267, 296912, 192291, 128882, 54043, 343629, 50381, 62871, 140934, 2223, 179172, 244500, 341772, 110327, 338521, 280986, 1927, 181304, 237182, 161970, 39856, 160069, 124172];
+    const seedIDs = [234931, 149296, 15045, 151347, 150376]
 
     try {
         // Loop through each BoardGameGeek ID to fetch and insert game data
@@ -76,6 +76,10 @@ async function seedUsers(gameIDs) {
 // Function to seed the database with event data
 async function seedEvents(gameIDs, userIDs) {
     try {
+        if (gameIDs.length === 0 || userIDs.length === 0) {
+            throw new Error("No game IDs or user IDs available for seeding events.");
+        }
+
         // Create the first event
         const game1 = await Game.findById(gameIDs[0]);
         const host1 = await User.findById(userIDs[0]);

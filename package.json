@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "NODE_ENV=development nodemon src/index.js",
-    "seed": "NODE_ENV=development node src/utils/seeddb.js",
+    "seed-development": "NODE_ENV=development node src/utils/seeddb.js",
+    "seed-production": "NODE_ENV=production node src/utils/seeddb.js",
     "test": "jest"
   },
   "keywords": [],
