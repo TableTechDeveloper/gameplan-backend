@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "NODE_ENV=development nodemon src/index.js",
+    "dev": "NODE_ENV=development HOST=localhost nodemon src/index.js",
     "seed-development": "NODE_ENV=development node src/utils/seeddb.js",
     "seed-production": "NODE_ENV=production node src/utils/seeddb.js",
     "test": "jest"
