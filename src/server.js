@@ -8,8 +8,8 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3001",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Explicitly allow options method
+    origin: "https://gameplan-deploy1.netlify.app/",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
