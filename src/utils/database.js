@@ -3,19 +3,19 @@ const { fetchBoardGameData } = require("./boardgamegeekApi");
 const { Game, User, Event } = require("../models/models");
 const { databaseURL } = require("../config/config");
 
-// Function to connect to the MongoDB database
+// Function to connect to the database
 async function databaseConnector(databaseURL) {
     await mongoose.connect(databaseURL);
     console.log("Database connection completed");
 }
 
-// Function to disconnect from the MongoDB database
+// Function to disconnect from the database
 async function databaseDisconnector() {
     await mongoose.connection.close();
     console.log("Database disconnected");
 }
 
-// Function to clear the MongoDB database
+// Function to clear the database
 async function databaseClear() {
     await mongoose.connection.db.dropDatabase();
     console.log("Database dropped");
@@ -142,7 +142,6 @@ async function seed() {
     await databaseDisconnector();
 }
 
-// Export database functions and seed function
 module.exports = {
     databaseConnector,
     databaseDisconnector,

@@ -47,7 +47,6 @@ function validatePassword(password){
     )
 }
 
-// Export the functions to make them available for import in other files
 module.exports = {
     handleValidationError,
     validatePassword

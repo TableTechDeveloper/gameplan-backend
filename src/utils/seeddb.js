@@ -1,4 +1,4 @@
-const { databaseConnector, seedGames, seedUsers, seedEvents, databaseClear, databaseDisconnector } = require("./database");
+const { databaseConnector, seedGames, seedUsers, seedEvents, databaseClear, databaseDisconnector } = require("./_utils")
 const { databaseURL } = require("../config/config");
 
 async function seed() {

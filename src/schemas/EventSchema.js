@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 // DRY function to determine if a game is published or draft.
-// This will determin if a field is mandatory (published), or optional (draft)
+// This will determine if a field is mandatory (published), or optional (draft)
 const isPublished = function () {
     return this.isPublished
 }

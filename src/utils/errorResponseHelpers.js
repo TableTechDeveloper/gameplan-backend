@@ -9,7 +9,6 @@ function handleAxiosError(error) {
         // The request was made but no response was received
         console.error("No response received:", error.request);
     } else {
-        // Something happened in setting up the request that triggered an Error
         console.error("Error in setting up request:", error.message);
     }
     console.error("Config:", error.config);
@@ -28,22 +27,21 @@ function errorHandler(error, request, response, next) {
 // Function to send an error response with a given status, message, and errors
 function sendErrorResponse(response, status, message, errors) {
     response.status(status).json({
-        status: status, // HTTP status code
-        message: message, // Error message
-        errors: errors // Array of error details
+        status: status,
+        message: message,
+        errors: errors
     });
 }
 
 // Function to send a success response with a given status, message, and data
 function sendSuccessResponse(response, status, message, data) {
     response.status(status).json({
-        status: status, // HTTP status code
-        message: message, // Success message
-        ...data // Additional data to include in the response
+        status: status,
+        message: message,
+        ...data
     });
 }
 
-// Export the functions
 module.exports = {
     handleAxiosError,
     errorHandler,

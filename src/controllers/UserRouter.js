@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { User, Game, Event } = require("../models/models");
 const { createJWT, checkPassword, authenticateJWT, handleValidationError, validatePassword, sendErrorResponse, sendSuccessResponse, sendPasswordResetEmail } = require("../utils/_utils");
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
 
 // STATIC ROUTES //
 
@@ -12,13 +10,16 @@ const crypto = require("crypto");
  * Requires body to include email, password, username, and (optional) location
  */
 router.post("/register", async (request, response, next) => {
-    const { email, password, username, location } = request.body;
+    const { email, password, username, location, securityQuestionOne, securityQuestionTwo, securityQuestionThree } = request.body;
 
     const newUser = new User({
         email,
         password,
         username,
-        location
+        location,
+        securityQuestionOne,
+        securityQuestionTwo,
+        securityQuestionThree
     });
 
     // Validate the password format
@@ -154,14 +155,6 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     const userId = request.user.id;
     const updatedDetails = request.body;
 
-    // If the password is being updated, validate and hash it
-    if (updatedDetails.password) {
-        if (!validatePassword(updatedDetails.password)) {
-            return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
-        }
-        updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
-    }
-
     try {
         // Update the user details in the database
         const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
@@ -181,76 +174,76 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
 
 /**
  * Route to POST (request) a password reset.
- * Generates a reset token and sends an email with the reset link.
+ * Provides Security Question challenges
  */
 router.post('/password-reset', async (request, response, next) => {
-    try {
-        const { email } = request.body;
+    const { email, securityQuestionOne, securityQuestionTwo, securityQuestionThree, password } = request.body;
 
+    try {
         // Find the user by email
         const user = await User.findOne({ email }).exec();
+
         if (!user) {
             return sendErrorResponse(response, 404, 'User not found', ['No user with that email address exists.']);
         }
 
-        // Generate a reset token
-        const resetToken = crypto.randomBytes(20).toString('hex');
+        if (user.securityQuestionOne !== securityQuestionOne || user.securityQuestionTwo !== securityQuestionTwo || user.securityQuestionThree !== securityQuestionThree) {
+            return sendErrorResponse(response, 401, "Incorrect security details provided", ["You have not correctly provided at least one of your security answers"])
+        }
+        // validate and hash the new password
+        if (!validatePassword(password)) {
+            return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
+        }
 
-        // Set reset token and expiry on user object
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-        // Save the user object with the reset token
+        user.password = password
         await user.save();
 
-        // Send the email with the reset link
-        sendPasswordResetEmail(user.email, resetToken, request.headers.host, response);
-
-        sendSuccessResponse(response, 200, 'Password reset email sent successfully', {});
+        sendSuccessResponse(response, 200, 'Password reset successfully', {});
     } catch (error) {
         next(error);
     }
-}); // TESTED
+});
 
-/**
- * Route to POST (reset) password using a token.
- */
-router.post('/reset/:token', async (request, response, next) => {
-    try {
-        const { token } = request.params;
-        const { newPassword } = request.body;
+// /**
+//  * Route to POST (reset) password using a token.
+//  * Removed route as now being handled with security questions.
+//  */
+// router.post('/reset/:token', async (request, response, next) => {
+//     try {
+//         const { token } = request.params;
+//         const { newPassword } = request.body;
 
-        // Check if new password is provided and valid
-        if (!newPassword) {
-            return sendErrorResponse(response, 400, 'New password is required', ['Please provide a new password.']);
-        }
+//         // Check if new password is provided and valid
+//         if (!newPassword) {
+//             return sendErrorResponse(response, 400, 'New password is required', ['Please provide a new password.']);
+//         }
 
-        if (!validatePassword(newPassword)) {
-            return sendErrorResponse(response, 400, 'Invalid password format', ['Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.']);
-        }
+//         if (!validatePassword(newPassword)) {
+//             return sendErrorResponse(response, 400, 'Invalid password format', ['Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.']);
+//         }
 
-        // Find the user by the reset token and check if the token has not expired
-        const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() } // Check if the token has not expired
-        }).exec();
+//         // Find the user by the reset token and check if the token has not expired
+//         const user = await User.findOne({
+//             resetPasswordToken: token,
+//             resetPasswordExpires: { $gt: Date.now() } // Check if the token has not expired
+//         }).exec();
 
-        if (!user) {
-            return sendErrorResponse(response, 400, 'Invalid or expired token', ['The password reset token is invalid or has expired.']);
-        }
+//         if (!user) {
+//             return sendErrorResponse(response, 400, 'Invalid or expired token', ['The password reset token is invalid or has expired.']);
+//         }
 
-        // Update the user's password and clear the reset token and expiry
-        user.password = await bcrypt.hash(newPassword, 10);
-        user.resetPasswordToken = undefined; // Clear the reset token
-        user.resetPasswordExpires = undefined; // Clear the token expiration
+//         // Update the user's password and clear the reset token and expiry
+//         user.password = await bcrypt.hash(newPassword, 10);
+//         user.resetPasswordToken = undefined; // Clear the reset token
+//         user.resetPasswordExpires = undefined; // Clear the token expiration
 
-        await user.save();
+//         await user.save();
 
-        sendSuccessResponse(response, 200, 'Password has been reset successfully', {});
-    } catch (error) {
-        next(error);
-    }
-}); // TESTED
+//         sendSuccessResponse(response, 200, 'Password has been reset successfully', {});
+//     } catch (error) {
+//         next(error);
+//     }
+// }); // TESTED
 
 /**
  * Route to DELETE a game from the user's collection.

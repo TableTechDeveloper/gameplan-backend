@@ -43,16 +43,32 @@ const UserSchema = new mongoose.Schema({
         ref: "Event",
         required: false
     }],
-    resetPasswordToken: {
+    securityQuestionOne: {
         type: String,
-        required: false,
+        required: true,
         unique: false
     },
-    resetPasswordExpires: {
-        type: Date,
-        required: false,
+    securityQuestionTwo: {
+        type: String,
+        required: true,
+        unique: false
+    },
+    securityQuestionThree: {
+        type: String,
+        required: true,
         unique: false
     }
+    // Originally included a password reset email option, however for simplicity and brevity altered approach to security question above.
+    // resetPasswordToken: {
+    //     type: String,
+    //     required: false,
+    //     unique: false
+    // },
+    // resetPasswordExpires: {
+    //     type: Date,
+    //     required: false,
+    //     unique: false
+    // },
 }, {
     timestamps: true
 });

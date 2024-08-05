@@ -1,6 +1,6 @@
 const axios = require("axios");
 const xml2js = require("xml2js");
-const { handleAxiosError } = require("./errorResponseHelpers");
+const { handleAxiosError } = require("./_utils");
 
 // Function to fetch board game data from the BoardGameGeek API given a URL
 async function fetchBoardGameData(url) {
@@ -66,6 +66,7 @@ async function searchForSingleGame(name) {
 }
 
 // Function to search for multiple games by name and retrieve their object IDs from the BoardGameGeek API
+// Due to client rendering, this function may not be called at present, however remaining uncommented in the event we wish to update the client
 async function searchForMultipleGames(name) {
     try {
         // Make an HTTP GET request to search for games by name
