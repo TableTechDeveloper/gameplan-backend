@@ -39,13 +39,19 @@ GamePlan can be run locally or deployed to a platform like Render. It uses a Mon
 
 To run the application locally, use:
 
+#### For development/local:
+```npm run dev```
+#### For production:
 ```npm start```
 
 ### Important Commands
 
 - To seed the database with some games, 2 events, and 1 user, run:
 
-  ```npm run seed```
+#### For development/local:
+  ```npm run seed-development```
+#### For production:
+  ```npm run seed-production```
 
 ## Configuration
 
