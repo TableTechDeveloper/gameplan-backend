@@ -1,0 +1,22 @@
+meta {
+  name: Update exisiting user
+  type: http
+  seq: 5
+}
+
+patch {
+  url: http://gameplan-backend.onrender.com/user/update
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}
+
+body:json {
+  {
+    "bio": "Example bio",
+    "location": "Example location"
+  }
+}

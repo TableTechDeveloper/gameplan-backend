@@ -1,0 +1,24 @@
+meta {
+  name: Create new event
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://gameplan-backend.onrender.com/events/new
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}
+
+body:json {
+  {
+    "title": "Event from the route",
+    "game": "66b0be151cfa076cbc3ea376",
+    "isPublished": false,
+    "isPublic": true
+  }
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Show user details
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://gameplan-backend.onrender.com/user
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}

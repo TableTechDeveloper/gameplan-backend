@@ -1,0 +1,24 @@
+meta {
+  name: Delete an event
+  type: http
+  seq: 5
+}
+
+delete {
+  url: http://gameplan-backend.onrender.com/events/66b0be5e1cfa076cbc3ea380
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}
+
+body:json {
+  {
+    "title": "Test to be deleted from the route",
+    "game": "66a5b718d3b34987e0c0eaf4",
+    "isPublished": false,
+    "isPublic": true
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Add game to collection
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://gameplan-backend.onrender.com/games/add
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}
+
+body:json {
+  {
+    "gameId": "2397"
+  }
+}

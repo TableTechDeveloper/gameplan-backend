@@ -1,0 +1,20 @@
+meta {
+  name: Search for Games
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://gameplan-backend.onrender.com/games/search?query=Backgammon&strict=true
+  body: none
+  auth: bearer
+}
+
+query {
+  query: Backgammon
+  strict: true
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}

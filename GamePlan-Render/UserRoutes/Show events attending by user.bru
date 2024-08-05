@@ -1,0 +1,19 @@
+meta {
+  name: Show events attending by user
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://gameplan-backend.onrender.com/user/events?hosted=false
+  body: none
+  auth: bearer
+}
+
+query {
+  hosted: false
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}

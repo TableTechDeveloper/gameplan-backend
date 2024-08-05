@@ -1,0 +1,18 @@
+meta {
+  name: Login exisiting user
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://gameplan-backend.onrender.com/user/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "Test1234",
+    "password": "Test@1234"
+  }
+}

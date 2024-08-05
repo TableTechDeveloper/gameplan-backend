@@ -1,0 +1,15 @@
+meta {
+  name: Delete the user
+  type: http
+  seq: 8
+}
+
+delete {
+  url: http://gameplan-backend.onrender.com/user
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}

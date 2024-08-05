@@ -1,0 +1,19 @@
+meta {
+  name: Show event from id param
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://gameplan-backend.onrender.com/events/66acb46a4c74212bb1167ddb
+  body: none
+  auth: none
+}
+
+body:json {
+  {
+    "email": "dilloncotter@example.com",
+    "password": "Th1sIs47est*",
+    "username": "Super Awesome McCool"
+  }
+}

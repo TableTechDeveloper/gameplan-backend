@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "GamePlan-Render",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
