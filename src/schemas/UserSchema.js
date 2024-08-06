@@ -45,17 +45,17 @@ const UserSchema = new mongoose.Schema({
     }],
     securityQuestionOne: {
         type: String,
-        required: true,
+        required: [true, "You must provide an answer to all security questions"],
         unique: false
     },
     securityQuestionTwo: {
         type: String,
-        required: true,
+        required: [true, "You must provide an answer to all security questions"],
         unique: false
     },
     securityQuestionThree: {
         type: String,
-        required: true,
+        required: [true, "You must provide an answer to all security questions"],
         unique: false
     }
     // Originally included a password reset email option, however for simplicity and brevity altered approach to security question above.

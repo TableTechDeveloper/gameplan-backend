@@ -1,19 +1,19 @@
 meta {
   name: Show events attending by user
   type: http
-  seq: 3
+  seq: 8
 }
 
 get {
-  url: http://localhost:3000/user/events?hosted=false
+  url: http://localhost:3000/user/events?hosted=true
   body: none
   auth: bearer
 }
 
 query {
-  hosted: false
+  hosted: true
 }
 
 auth:bearer {
-  token: TokenPlaceholder
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YjIxNDU1ZGFmYzFjYTFjNTgzMjY1OCIsImlhdCI6MTcyMjk0NjY0NSwiZXhwIjoxNzIzNTUxNDQ1fQ.BMlOxrsYhzCpS2nb24OQjbG5I_UTB40sPCksUzBhBsE
 }

@@ -56,7 +56,10 @@ async function seedUsers(gameIDs) {
             password: "Test@1234",
             username: "Test1234",
             location: "123 Fake Street, Geelong, VIC, 3220, AUS",
-            gamesOwned: gameIDs
+            gamesOwned: gameIDs,
+            securityQuestionOne: "blue",
+            securityQuestionTwo: "car",
+            securityQuestionThree: "bird"
         }
     ];
 
