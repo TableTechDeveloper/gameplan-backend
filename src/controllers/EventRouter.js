@@ -114,6 +114,49 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
     }
 }); // TESTED
 
+
+/**
+ * Route to POST a user leaving an event.
+ * Requires authentication.
+ */
+router.post("/:id/leave", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const eventId = request.params.id;
+
+        // Check that the event exists in the database
+        const event = await Event.findById(eventId).exec();
+        if (!event) {
+            return sendErrorResponse(response, 404, "Event not found", ["This event does not exist"]);
+        }
+
+        // Check that the user exists in the database
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
+        }
+
+        // Check if the user is a participant in the event
+        if (!event.participants.includes(userId)) {
+            return sendErrorResponse(response, 400, "User not registered for this event", ["You are not registered for this event"]);
+        }
+
+        // Remove the user from the event participants
+        event.participants.pull(userId);
+        // Remove the event from the user's eventsAttending list
+        user.eventsAttending.pull(eventId);
+
+        await event.save();
+        await user.save();
+
+        sendSuccessResponse(response, 200, `User has successfully left the ${event.title} event`, { event, user });
+    } catch (error) {
+        next(error);
+    }
+}); // TESTED
+
+
+
 /**
  * Route to GET and display an event when given an ID.
  */
@@ -233,17 +276,30 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
 
 /**
  * Route to GET and display all PUBLIC and PUBLISHED events.
- */
+*/
 router.get("/", async (request, response, next) => {
     try {
         const foundEvents = await Event.find({ isPublic: true, isPublished: true })
         .populate("host", "username") // add the username of the host along with the id
         .populate("participants", "username") // add the username(s) of the participants along with the id
+        .sort({ eventDate: 1 })
         .exec();
         sendSuccessResponse(response, 200, "Events retrieved successfully", { foundEvents });
     } catch (error) {
         next(error);
     }
-}); // TESTED
+}); // TESTED 
+
+// router.get("/", async (request, response, next) => {
+//     try {
+//         const foundEvents = await Event.find({ isPublic: true, isPublished: true })
+//             .populate("host", "username") // add the username of the host along with the id
+//             .populate("participants", "username") // add the username(s) of the participants along with the id
+//             .exec();
+//         sendSuccessResponse(response, 200, "Events retrieved successfully", { events: foundEvents });
+//     } catch (error) {
+//         next(error);
+//     }
+// }); // TESTED
 
 module.exports = router;

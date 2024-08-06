@@ -315,10 +315,31 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
 
 // CATCH-ALL //
 
+
 /**
  * Route to GET and display all information on the user.
  * Requires authentication.
- */
+ * */
+// Example backend endpoint to get user data
+router.get("/", authenticateJWT, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id).select("_id username email location bio").exec();
+        if (!user) {
+            return res.status(404).json({ status: 404, message: "User not found" });
+        }
+        res.json({ status: 200, message: "User retrieved successfully", user });
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+
+
+/**
+ * Route to GET and display all information on the user.
+ * Requires authentication.
+ 
 router.get("/", authenticateJWT, async (request, response, next) => {
     try {
         const userId = request.user.id;
@@ -331,6 +352,7 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         
         // Send the user's details in the response
         sendSuccessResponse(response, 200, "User retrieved successfully", {
+            id: user._id,
             username: user.username,
             email: user.email,
             location: user.location,
@@ -341,5 +363,6 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         next(error);
     }
 }); // TESTED
+*/
 
 module.exports = router;
