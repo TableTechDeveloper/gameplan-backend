@@ -206,6 +206,47 @@ router.patch("/:id", authenticateJWT, async (request, response, next) => {
 }); 
 
 /**
+ * Route to DELETE a user attending an event they are participating in.
+ * Requires authentication
+ */
+router.delete("/:id/leave", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const eventId = request.params.id;
+
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
+        }
+        const event = await Event.findById(eventId).exec();
+        if (!event) {
+            return sendErrorResponse(response, 404, "Event not found", ["The event is not found"]);
+        }
+
+        // Check if the user is attending the event
+        if (!user.eventsAttending.includes(eventId)) {
+            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
+        }
+
+        // Remove the event from the user's attending list
+        user.eventsAttending.pull(eventId);
+        await user.save();
+
+        // Remove the user from the event participants
+        if (!event.participants.includes(userId)) {
+            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
+        }
+
+        event.participants.pull(userId);
+        await event.save();
+
+        sendSuccessResponse(response, 200, `You have successfully left the ${event.title} event`);
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
  * Route to DELETE an event.
  * Requires authentication.
  */
@@ -243,6 +284,7 @@ router.get("/", async (request, response, next) => {
         const foundEvents = await Event.find({ isPublic: true, isPublished: true })
         .populate("host", "username") // add the username of the host along with the id
         .populate("participants", "username") // add the username(s) of the participants along with the id
+        .sort({ eventDate: 1 }) // Sort events by event date in ascending order
         .exec();
         sendSuccessResponse(response, 200, "Events retrieved successfully", { foundEvents });
     } catch (error) {
