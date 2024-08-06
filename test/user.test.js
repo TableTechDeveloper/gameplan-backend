@@ -9,12 +9,16 @@ describe('Users', () => {
     // Before each test, clear the User collection
     beforeEach(async () => {
         await User.deleteMany({});
+        console.log()
 
         // Create a new user directly in the database
         const user = new User({
             email: 'testuser@example.com',
             password: 'Test@1234',
-            username: 'testuser'
+            username: 'testuser',
+            securityQuestionOne: 'car',
+            securityQuestionTwo: 'blue',
+            securityQuestionThree: 'dog'
         });
         await user.save();
 
@@ -39,6 +43,9 @@ describe('Users', () => {
                 email: 'testuser2@example.com',
                 password: 'Test@1234',
                 username: 'testuser2',
+                securityQuestionOne: 'car',
+                securityQuestionTwo: 'blue',
+                securityQuestionThree: 'dog'
             };
 
             // Send a POST request to /user/register

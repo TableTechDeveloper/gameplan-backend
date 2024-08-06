@@ -4,7 +4,7 @@ run-name: ${{ github.actor }} is testing the server routes
 on:
   push:
     branches:
-      - testing
+      - test-branch
   pull_request:
     branches:
       - main
