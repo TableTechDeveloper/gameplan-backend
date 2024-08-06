@@ -19,7 +19,9 @@ jobs:
         image: mongo:latest
         ports:
           - 27017:27017
-        options: --bind_ip_all
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: example
 
     steps:
       - name: Clone Repo
@@ -33,8 +35,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Wait for MongoDB to be ready
+        run: |
+          while ! nc -z localhost 27017; do
+            echo "Waiting for MongoDB...";
+            sleep 1;
+          done
+
       - name: Run tests
         run: npm test
         env:
           CI: true
-          MONGO_URL: mongodb://localhost:27017/testdb
+          MONGO_URL: mongodb://root:example@localhost:27017/testdb
