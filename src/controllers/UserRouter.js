@@ -155,50 +155,6 @@ router.get("/events", authenticateJWT, async (request, response, next) => {
     }
 }); // SCRIPTED // TESTED // PASSED
 
-router.delete("/events/:id", authenticateJWT, async (request, response, next) => {
-    try {
-        const userId = request.user.id;
-        const eventId = request.params.id;
-
-        const user = await User.findById(userId).exec();
-        if (!user) {
-            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
-        }
-        const event = await Event.findById(eventId).exec();
-        if (!event) {
-            return sendErrorResponse(response, 404, "Event not found", ["The event is not found"]);
-        }
-
-        // Check if the game is in the user's collection
-        const userAttendingEvent = user.eventsAttending.indexOf(eventId);
-        if (userAttendingEvent === -1) {
-            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
-        }
-
-        // Remove the game from the user's collection
-        user.eventsAttending.splice(userAttendingEvent, 1);
-        await user.save();
-
-        // Remove the user from the event participants
-        const eventParticipant = event.participants.indexOf(userId);
-        if (eventParticipant === -1) {
-            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
-        }
-
-        // Remove the game from the user's collection
-        event.participants.splice(eventParticipant, 1);
-        await event.save();
-
-        sendSuccessResponse(response, 200, `You have sucessfully left the ${event.title} event`);
-
-
-
-    } catch (error) {
-        next(error)
-    }
-
-});
-
 /**
  * Route to GET a user's game collection with optional search query.
  * Requires authentication.
@@ -376,6 +332,7 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         
         // Send the user's details in the response
         sendSuccessResponse(response, 200, "User retrieved successfully", {
+            id: user._id,
             username: user.username,
             email: user.email,
             location: user.location,
