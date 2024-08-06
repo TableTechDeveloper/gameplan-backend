@@ -13,12 +13,20 @@ jobs:
   servertest:
     name: Install project and run tests
     runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: --bind_ip_all
+
     steps:
       - name: Clone Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v2
         with:
           node-version: 20
 
@@ -29,3 +37,4 @@ jobs:
         run: npm test
         env:
           CI: true
+          MONGO_URL: mongodb://localhost:27017/testdb
