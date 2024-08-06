@@ -12,9 +12,9 @@ const { createJWT, checkPassword, authenticateJWT, handleValidationError, valida
 router.post("/register", async (request, response, next) => {
     let { email, password, username, location, securityQuestionOne, securityQuestionTwo, securityQuestionThree } = request.body;
 
-    securityQuestionOne = securityQuestionOne.toLowerCase();
-    securityQuestionTwo = securityQuestionTwo.toLowerCase();
-    securityQuestionThree = securityQuestionThree.toLowerCase();
+    if (securityQuestionOne) securityQuestionOne = securityQuestionOne.toLowerCase();
+    if (securityQuestionTwo) securityQuestionTwo = securityQuestionTwo.toLowerCase();
+    if (securityQuestionThree) securityQuestionThree = securityQuestionThree.toLowerCase();
 
     const newUser = new User({
         email,
@@ -41,13 +41,13 @@ router.post("/register", async (request, response, next) => {
         // Handle validation errors
         handleValidationError(error, response);
     }
-}); // TESTED
+}); // SCRIPTED // TESTED // PASSED
 
 /**
  * Route to POST (login) an existing user.
  * Requires body to include username and password
  */
-router.post("/login", async (request, response, next) => {
+router.post("/login", async (request, response  , next) => {
     const { username, password } = request.body;
 
     // Check if username and password are provided
@@ -77,7 +77,43 @@ router.post("/login", async (request, response, next) => {
         console.error("Error logging in:", error);
         next(error);
     }
-}); // TESTED
+}); // SCRIPTED // TESTED // PASSED
+
+/**
+ * Route to POST (request) a password reset.
+ * Provides Security Question challenges
+ */
+router.post('/password-reset', async (request, response, next) => {
+    let { email, securityQuestionOne, securityQuestionTwo, securityQuestionThree, password } = request.body;
+
+    if (securityQuestionOne) securityQuestionOne = securityQuestionOne.toLowerCase();
+    if (securityQuestionTwo) securityQuestionTwo = securityQuestionTwo.toLowerCase();
+    if (securityQuestionThree) securityQuestionThree = securityQuestionThree.toLowerCase();
+    
+    try {
+        // Find the user by email
+        const user = await User.findOne({ email }).exec();
+
+        if (!user) {
+            return sendErrorResponse(response, 404, 'User not found', ['No user with that email address exists.']);
+        }
+
+        if (user.securityQuestionOne !== securityQuestionOne || user.securityQuestionTwo !== securityQuestionTwo || user.securityQuestionThree !== securityQuestionThree) {
+            return sendErrorResponse(response, 401, "Incorrect security details provided", ["You have not correctly provided at least one of your security answers"])
+        }
+        // validate and hash the new password
+        if (!validatePassword(password)) {
+            return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
+        }
+
+        user.password = password
+        await user.save();
+
+        sendSuccessResponse(response, 200, 'Password reset successfully', {});
+    } catch (error) {
+        next(error);
+    }
+}); // SCRIPTED // TESTED // PASSED
 
 // ROUTES WITH PARAMETERS //
 
@@ -117,7 +153,51 @@ router.get("/events", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving events:", error);
         next(error);
     }
-}); // TESTED
+}); // SCRIPTED // TESTED // PASSED
+
+router.delete("/events/:id", authenticateJWT, async (request, response, next) => {
+    try {
+        const userId = request.user.id;
+        const eventId = request.params.id;
+
+        const user = await User.findById(userId).exec();
+        if (!user) {
+            return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
+        }
+        const event = await Event.findById(eventId).exec();
+        if (!event) {
+            return sendErrorResponse(response, 404, "Event not found", ["The event is not found"]);
+        }
+
+        // Check if the game is in the user's collection
+        const userAttendingEvent = user.eventsAttending.indexOf(eventId);
+        if (userAttendingEvent === -1) {
+            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
+        }
+
+        // Remove the game from the user's collection
+        user.eventsAttending.splice(userAttendingEvent, 1);
+        await user.save();
+
+        // Remove the user from the event participants
+        const eventParticipant = event.participants.indexOf(userId);
+        if (eventParticipant === -1) {
+            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
+        }
+
+        // Remove the game from the user's collection
+        event.participants.splice(eventParticipant, 1);
+        await event.save();
+
+        sendSuccessResponse(response, 200, `You have sucessfully left the ${event.title} event`);
+
+
+
+    } catch (error) {
+        next(error)
+    }
+
+});
 
 /**
  * Route to GET a user's game collection with optional search query.
@@ -148,7 +228,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving games:", error);
         next(error);
     }
-}); // TESTED
+}); // SCRIPTED // TESTED // PASSED
 
 /**
  * Route to PATCH (update) an existing user's details.
@@ -174,42 +254,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         handleValidationError(error, response);
     }
-}); // TESTED
-
-/**
- * Route to POST (request) a password reset.
- * Provides Security Question challenges
- */
-router.post('/password-reset', async (request, response, next) => {
-    let { email, securityQuestionOne, securityQuestionTwo, securityQuestionThree, password } = request.body;
-
-    securityQuestionOne = securityQuestionOne.toLowerCase()
-    securityQuestionTwo = securityQuestionTwo.toLowerCase()
-    securityQuestionThree = securityQuestionThree.toLowerCase()
-    try {
-        // Find the user by email
-        const user = await User.findOne({ email }).exec();
-
-        if (!user) {
-            return sendErrorResponse(response, 404, 'User not found', ['No user with that email address exists.']);
-        }
-
-        if (user.securityQuestionOne !== securityQuestionOne || user.securityQuestionTwo !== securityQuestionTwo || user.securityQuestionThree !== securityQuestionThree) {
-            return sendErrorResponse(response, 401, "Incorrect security details provided", ["You have not correctly provided at least one of your security answers"])
-        }
-        // validate and hash the new password
-        if (!validatePassword(password)) {
-            return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
-        }
-
-        user.password = password
-        await user.save();
-
-        sendSuccessResponse(response, 200, 'Password reset successfully', {});
-    } catch (error) {
-        next(error);
-    }
-});
+}); // SCRIPTED // TESTED // PASSED
 
 // /**
 //  * Route to POST (reset) password using a token.
@@ -250,7 +295,7 @@ router.post('/password-reset', async (request, response, next) => {
 //     } catch (error) {
 //         next(error);
 //     }
-// }); // TESTED
+// }); 
 
 /**
  * Route to DELETE a game from the user's collection.
@@ -288,7 +333,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         console.error("Error removing game from collection:", error);
         next(error);
     }
-}); // TESTED
+}); // SCRIPTED // TESTED // PASSED
 
 /**
  * Route to DELETE the current logged-in user.
@@ -311,7 +356,7 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // TESTED
+}); 
 
 // CATCH-ALL //
 
@@ -340,6 +385,6 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving user: ", error);
         next(error);
     }
-}); // TESTED
+}); // SCRIPTED // TESTED // PASSED
 
 module.exports = router;

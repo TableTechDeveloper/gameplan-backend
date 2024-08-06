@@ -67,7 +67,7 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // TESTED
+}); 
 
 /**
  * Route to POST a user registering their attendance to an event.
@@ -100,6 +100,10 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
             return sendErrorResponse(response, 400, "This event is full", ["Sorry, this event is currently full, please find another event or try again later."]);
         }
 
+        if (event.isPublished == false) {
+            return sendErrorResponse(response, 400, "This event is not ready yet!", ["Sorry, this event is not yet published. Please reach out to the event organiser to request this be updated"]);
+        }
+
         // add the user to the event
         event.participants.push(userId);
         // add the event to the user
@@ -112,7 +116,7 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
     } catch (error) {
         next(error);
     }
-}); // TESTED
+}); 
 
 /**
  * Route to GET and display an event when given an ID.
@@ -140,7 +144,7 @@ router.get("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // TESTED
+}); 
 
 /**
  * Route to PATCH (edit) an event.
@@ -199,7 +203,7 @@ router.patch("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // TESTED
+}); 
 
 /**
  * Route to DELETE an event.
@@ -227,7 +231,7 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // TESTED
+}); 
 
 // CATCH-ALL
 
@@ -244,6 +248,6 @@ router.get("/", async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // TESTED
+});  // SCRIPTED // TESTED // PASSED
 
 module.exports = router;
