@@ -17,7 +17,10 @@ describe('Games', () => {
             user = new User({
                 email: `testuser+${Date.now()}@example.com`,
                 password: 'Test@1234',
-                username: `testuser${Date.now()}`
+                username: `testuser${Date.now()}`,
+                securityQuestionOne: 'car',
+                securityQuestionTwo: 'blue',
+                securityQuestionThree: 'dog'
             });
             await user.save();
 

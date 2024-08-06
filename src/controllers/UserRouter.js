@@ -10,7 +10,11 @@ const { createJWT, checkPassword, authenticateJWT, handleValidationError, valida
  * Requires body to include email, password, username, and (optional) location
  */
 router.post("/register", async (request, response, next) => {
-    const { email, password, username, location, securityQuestionOne, securityQuestionTwo, securityQuestionThree } = request.body;
+    let { email, password, username, location, securityQuestionOne, securityQuestionTwo, securityQuestionThree } = request.body;
+
+    securityQuestionOne = securityQuestionOne.toLowerCase();
+    securityQuestionTwo = securityQuestionTwo.toLowerCase();
+    securityQuestionThree = securityQuestionThree.toLowerCase();
 
     const newUser = new User({
         email,
@@ -177,8 +181,11 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
  * Provides Security Question challenges
  */
 router.post('/password-reset', async (request, response, next) => {
-    const { email, securityQuestionOne, securityQuestionTwo, securityQuestionThree, password } = request.body;
+    let { email, securityQuestionOne, securityQuestionTwo, securityQuestionThree, password } = request.body;
 
+    securityQuestionOne = securityQuestionOne.toLowerCase()
+    securityQuestionTwo = securityQuestionTwo.toLowerCase()
+    securityQuestionThree = securityQuestionThree.toLowerCase()
     try {
         // Find the user by email
         const user = await User.findOne({ email }).exec();
