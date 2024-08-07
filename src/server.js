@@ -10,7 +10,7 @@ app.use(
   cors({
     // origin: `https://gameplan-deploy1.netlify.app`,
     origin: `*`,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
