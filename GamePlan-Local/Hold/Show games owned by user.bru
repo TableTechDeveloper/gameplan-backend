@@ -1,11 +1,11 @@
 meta {
-  name: Delete the user
+  name: Show games owned by user
   type: http
-  seq: 9
+  seq: 7
 }
 
-delete {
-  url: http://localhost:3000/user
+get {
+  url: http://localhost:3000/user/collection
   body: none
   auth: bearer
 }

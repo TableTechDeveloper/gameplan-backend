@@ -8,7 +8,8 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://gameplan-deploy1.netlify.app",
+    // origin: "https://gameplan-deploy1.netlify.app", commented out during testing, if this were a production and not a project we would ensure this is updated when deployed.
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

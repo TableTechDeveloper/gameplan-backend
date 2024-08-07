@@ -1,15 +1,22 @@
 meta {
-  name: Show games owned by user
+  name: Update exisiting user
   type: http
   seq: 6
 }
 
-get {
-  url: http://localhost:3000/user/collection
-  body: none
+patch {
+  url: http://localhost:3000/user/update
+  body: json
   auth: bearer
 }
 
 auth:bearer {
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YjJjY2JlYTU2NmE2OTQwYTJjNjE2MyIsImlhdCI6MTcyMjk5Mzg1NiwiZXhwIjoxNzIzNTk4NjU2fQ.y38Uw76bojarZJFLmf1FsxLXOTIUFTQzKGlDVeoSgpY
+}
+
+body:json {
+  {
+    "bio": "Example bio",
+    "location": "Example location"
+  }
 }
