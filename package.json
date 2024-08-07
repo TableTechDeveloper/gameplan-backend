@@ -8,7 +8,8 @@
     "dev": "NODE_ENV=development HOST=localhost nodemon src/index.js",
     "seed-development": "NODE_ENV=development node src/utils/seeddb.js",
     "seed-production": "NODE_ENV=production node src/utils/seeddb.js",
-    "test": "jest"
+    "test": "jest",
+    "test-coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
