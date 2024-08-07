@@ -358,8 +358,8 @@ router.get("/", authenticateJWT, async (request, response, next) => {
             id: user._id,
             username: user.username,
             email: user.email,
-            location: user.location,
-            bio: user.bio
+            location: user.location || "" ,
+            bio: user.bio || ""
         });
     } catch (error) {
         console.error("Error retrieving user: ", error);

@@ -1,11 +1,11 @@
 meta {
-  name: Show games owned by user
+  name: Leave an event
   type: http
-  seq: 12
+  seq: 3
 }
 
-get {
-  url: http://localhost:3000/user/collection
+delete {
+  url: http://localhost:3000/events/66b2f1e5087e0c25ff61ea9b/leave
   body: none
   auth: bearer
 }
