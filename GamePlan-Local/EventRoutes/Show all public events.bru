@@ -1,0 +1,19 @@
+meta {
+  name: Show all public events
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/events
+  body: none
+  auth: none
+}
+
+body:json {
+  {
+    "email": "dilloncotter@example.com",
+    "password": "Th1sIs47est*",
+    "username": "Super Awesome McCool"
+  }
+}
