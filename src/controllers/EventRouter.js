@@ -228,6 +228,10 @@ router.delete("/:id/leave", authenticateJWT, async (request, response, next) => 
             return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
         }
 
+        if (event.host.equals(user._id)) {
+            return sendErrorResponse(response, 418, "You are the host! You cannot leave!", ["The host is not permitted to leave the event"]) // This is an easter egg code response, Hi Alex!
+        }
+
         // Remove the event from the user's attending list
         user.eventsAttending.pull(eventId);
         await user.save();
