@@ -8,7 +8,8 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://gameplan-deploy1.netlify.app",
+    // origin: `https://gameplan-deploy1.netlify.app`,
+    origin: `*`,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -18,11 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Connect to the database
 if (databaseURL) {
-    mongoose.connect(databaseURL)
-        .then(() => console.log("Database connected successfully"))
-        .catch(err => console.error("Database connection error:", err));
+  mongoose
+    .connect(databaseURL)
+    .then(() => console.log("Database connected successfully"))
+    .catch((err) => console.error("Database connection error:", err));
 } else {
-    console.error("No valid database URL provided");
+  console.error("No valid database URL provided");
 }
 
 // Import and use user routes
@@ -39,7 +41,9 @@ app.use("/games", gameRoute);
 
 // Catch-all route for handling 404 errors
 app.use((request, response, next) => {
-    sendErrorResponse(response, 404, "Not Found", ["The requested resource could not be found"]);
+  sendErrorResponse(response, 404, "Not Found", [
+    "The requested resource could not be found",
+  ]);
 });
 
 // General error handler middleware
