@@ -37,7 +37,8 @@ async function fetchBoardGameData(url) {
             playtime: playTime,
             description: boardgameDescription,
             thumbnail: thumbnail,
-            image: image
+            image: image,
+            url: `https://boardgamegeek.com/boardgame/${boardgameGeekRef}`
         };
 
     } catch (error) {
