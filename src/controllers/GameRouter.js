@@ -59,7 +59,7 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
         user.gamesOwned.push(game._id);
         await user.save();
 
-        sendSuccessResponse(response, 200, "Game added to collection successfully");
+        sendSuccessResponse(response, 200, `${game.name} added to collection successfully`);
     } catch (error) {
         next(error);
     }
