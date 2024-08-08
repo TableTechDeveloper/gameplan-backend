@@ -134,6 +134,7 @@ router.get("/:id", authenticateJWT, async (request, response, next) => {
         const result = await Event.findById(request.params.id)
         .populate("host", "username") // add the username of the host along with the id
         .populate("participants", "username") // add the username(s) of the participants along with the id
+        .populate("game", "name")
         .exec();
 
         // check if the event exists
