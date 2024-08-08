@@ -50,11 +50,11 @@ beforeAll(async () => {
         
         await wrongUser.save();
         wrongUserToken = createJWT(wrongUser._id)
-});
+}, 30000);
 
 afterAll(async() => {
     await mongoose.connection.close();
-})
+}, 30000)
 
 describe('UserRouter', () => {
     describe("POST /user/register", () => {

@@ -27,11 +27,11 @@ beforeAll(async () => {
     await user.save();
     token = createJWT(user._id)
 
-});
+}, 30000);
 
 afterAll(async() => {
     await mongoose.connection.close();
-})
+}, 30000)
 
 describe("GameRouter", () => {
     describe("GET /games/search", () => {

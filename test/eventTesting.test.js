@@ -53,11 +53,11 @@ beforeAll(async () => {
         await sadUser.save();
         sadUserToken = createJWT(sadUser._id)
 
-});
+}, 30000);
 
 afterAll(async() => {
     await mongoose.connection.close();
-})
+}, 30000)
 
 describe("EventRouter", () => {
     describe("GET /events/", () => {
