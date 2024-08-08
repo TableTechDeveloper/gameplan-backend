@@ -1,0 +1,27 @@
+meta {
+  name: Create new event
+  type: http
+  seq: 6
+}
+
+post {
+  url: https://gameplan-backend.onrender.com//events/new
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}
+
+body:json {
+  {
+    "title": "Event from the route",
+    "game": "66b2d50bcbdd1384fbcfa4b5",
+    "isPublished": true,
+    "isPublic": true,
+    "eventDate": "2024-08-07T17:00:00+10:00",
+    "location": "Aus",
+    "maxParticipants": 2
+  }
+}

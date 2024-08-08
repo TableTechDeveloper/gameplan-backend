@@ -1,0 +1,15 @@
+meta {
+  name: Show games owned by user
+  type: http
+  seq: 7
+}
+
+get {
+  url: https://gameplan-backend.onrender.com//user/collection
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
+}
