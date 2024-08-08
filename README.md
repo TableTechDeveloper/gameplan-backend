@@ -9,8 +9,6 @@ GamePlan is an event hosting and planning tool that allows users to add boardgam
 - [Configuration](#configuration)
 - [Features](#features)
 - [Contributing](#contributing)
-- [License](#license)
-- [Contact Information](#contact-information)
 
 ## Installation
 
@@ -30,6 +28,25 @@ This project was designed on MacOS Sonoma 14.5 while this code may work on other
 2. Install the dependencies:
 
    ```npm install```
+
+#### Stack includes:
+- axios
+- bcryptjs
+- cors
+- crypto
+- dotenv
+- express
+- jsonwebtoken
+- mongoose
+- xml2js
+
+<bold>Dev dependancies</bold>
+- jest
+- nodemon
+- supertest
+
+<bold>Currently unused modules</bold>
+- nodemailer
 
 ## Usage
 
@@ -78,7 +95,3 @@ EMAIL_PASS=your_email_password
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.
-
-## License
-
-This project is licensed under the MIT License.
