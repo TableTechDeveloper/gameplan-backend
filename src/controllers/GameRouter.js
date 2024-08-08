@@ -60,11 +60,11 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
         user.gamesOwned.push(game._id);
         await user.save();
 
-        sendSuccessResponse(response, 200, `${game.name} added to collection successfully`);
+        sendSuccessResponse(response, 200, `${game.name} added to collection successfully`, {id: game._id});
     } catch (error) {
         next(error);
     }
-});
+}); // JEST TESTED
 
 /**
  * Route to GET (search for) games.
@@ -94,7 +94,7 @@ router.get("/search", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 /**
  * Route to GET (fetch detailed) game data by ID.
@@ -114,7 +114,7 @@ router.get("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 // CATCH-ALL //
 

@@ -1,6 +1,6 @@
 const axios = require("axios");
 const xml2js = require("xml2js");
-const { handleAxiosError } = require("./_utils");
+const { handleAxiosError } = require("./errorResponseHelpers");
 
 // Function to fetch board game data from the BoardGameGeek API given a URL
 async function fetchBoardGameData(url) {
