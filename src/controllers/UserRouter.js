@@ -42,7 +42,7 @@ router.post("/register", async (request, response, next) => {
         // Handle validation errors
         handleValidationError(error, response);
     }
-});
+}); // JEST TESTED
 
 /**
  * Route to POST (login) an existing user.
@@ -78,7 +78,7 @@ router.post("/login", async (request, response  , next) => {
         console.error("Error logging in:", error);
         next(error);
     }
-});
+}); // JEST TESTED
 
 /**
  * Route to POST (request) a password reset.
@@ -96,7 +96,7 @@ router.post('/password-reset', async (request, response, next) => {
         const user = await User.findOne({ email }).exec();
 
         if (!user) {
-            return sendErrorResponse(response, 404, 'User not found', ['No user with that email address exists.']);
+            return sendErrorResponse(response, 404, "User not found", ["No user with that email address exists."]);
         }
 
         if (user.securityQuestionOne !== securityQuestionOne || user.securityQuestionTwo !== securityQuestionTwo || user.securityQuestionThree !== securityQuestionThree) {
@@ -110,11 +110,11 @@ router.post('/password-reset', async (request, response, next) => {
         user.password = password
         await user.save();
 
-        sendSuccessResponse(response, 200, 'Password reset successfully', {});
+        sendSuccessResponse(response, 200, "Password reset successfully", {});
     } catch (error) {
         next(error);
     }
-});
+}); // JEST TESTED
 
 // ROUTES WITH PARAMETERS //
 
@@ -185,16 +185,14 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving games:", error);
         next(error);
     }
-});
+}); //JEST TESTED
 
 /**
  * Route to PATCH (update) an existing user's details.
  * Requires authentication.
- * NOT FOR PASSWORDS
  */
 
 router.patch("/update", authenticateJWT, async (request, response, next) => {
-    console.log("Received update request");
     const userId = request.user.id;
     const updatedDetails = request.body;
 
@@ -224,7 +222,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
         console.log("Error updating user details:", error);
         next(error);
     }
-});
+}); // JEST TESTED
 
 // /**
 //  * Route to POST (reset) password using a token.
@@ -303,7 +301,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         console.error("Error removing game from collection:", error);
         next(error);
     }
-});
+}); // JEST TESTED
 
 /**
  * Route to DELETE the current logged-in user.
@@ -335,7 +333,7 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+});  // JEST TESTED
 
 // CATCH-ALL //
 
@@ -365,6 +363,6 @@ router.get("/", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving user: ", error);
         next(error);
     }
-});
+}); // JEST TESTED
 
 module.exports = router;
