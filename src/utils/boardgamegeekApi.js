@@ -37,7 +37,8 @@ async function fetchBoardGameData(url) {
             playtime: playTime,
             description: boardgameDescription,
             thumbnail: thumbnail,
-            image: image
+            image: image,
+            url: `https://boardgamegeek.com/boardgame/${boardgameGeekRef}`
         };
 
     } catch (error) {
@@ -73,7 +74,7 @@ async function searchForMultipleGames(name) {
         const response = await axios.get(`https://boardgamegeek.com/xmlapi/search?search=${name}`);
         const parsedData = await xml2js.parseStringPromise(response.data);
         const boardgameResults = parsedData.boardgames.boardgame;
-        console.log("Results: ", boardgameResults)
+        // console.log("Results: ", boardgameResults)
 
         // Return minimal data for each result, ensuring all necessary properties exist
         const gameData = boardgameResults.map(game => ({

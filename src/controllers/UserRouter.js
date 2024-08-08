@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { User, Game, Event } = require("../models/models");
 const { createJWT, checkPassword, authenticateJWT, handleValidationError, validatePassword, sendErrorResponse, sendSuccessResponse, sendPasswordResetEmail } = require("../utils/_utils");
+const bcrypt = require("bcryptjs")
 
 // STATIC ROUTES //
 
@@ -41,7 +42,7 @@ router.post("/register", async (request, response, next) => {
         // Handle validation errors
         handleValidationError(error, response);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 /**
  * Route to POST (login) an existing user.
@@ -77,7 +78,7 @@ router.post("/login", async (request, response  , next) => {
         console.error("Error logging in:", error);
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 /**
  * Route to POST (request) a password reset.
@@ -113,7 +114,7 @@ router.post('/password-reset', async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 // ROUTES WITH PARAMETERS //
 
@@ -153,7 +154,7 @@ router.get("/events", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving events:", error);
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 /**
  * Route to GET a user's game collection with optional search query.
@@ -184,33 +185,46 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving games:", error);
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 /**
  * Route to PATCH (update) an existing user's details.
  * Requires authentication.
  * NOT FOR PASSWORDS
  */
+
 router.patch("/update", authenticateJWT, async (request, response, next) => {
+    console.log("Received update request");
     const userId = request.user.id;
     const updatedDetails = request.body;
 
+    if (updatedDetails.password) {
+        if (!validatePassword(updatedDetails.password)) {
+            console.log("Password validation failed");
+            return sendErrorResponse(response, 400, "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.");
+        }
+        updatedDetails.password = await bcrypt.hash(updatedDetails.password, 10);
+    }
+
     try {
         // Update the user details in the database
+        console.log("Updating user details");
         const updatedUser = await User.findByIdAndUpdate(userId, updatedDetails, {
             new: true,
             runValidators: true
         });
 
         if (!updatedUser) {
+            console.log("User not found");
             return sendErrorResponse(response, 404, "User not found", ["This user does not exist"]);
         }
 
         sendSuccessResponse(response, 200, "User details have been updated!", { updatedUser });
     } catch (error) {
-        handleValidationError(error, response);
+        console.log("Error updating user details:", error);
+        next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 // /**
 //  * Route to POST (reset) password using a token.
@@ -289,7 +303,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         console.error("Error removing game from collection:", error);
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 /**
  * Route to DELETE the current logged-in user.
@@ -304,6 +318,15 @@ router.delete("/", authenticateJWT, async (request, response, next) => {
         if (!user) {
             return sendErrorResponse(response, 404, "User not found", ["The user is not found or not logged in"]);
         }
+
+        // Remove all events user is a host of
+        await Event.deleteMany({ host: userId })
+        
+        // Find all events where the user is a participant and remove them from the participants array
+        await Event.updateMany(
+            { participants: userId },
+            { $pull: { participants: userId } }
+        );
 
         // Delete the user from the database
         await User.findByIdAndDelete(userId);
@@ -335,13 +358,13 @@ router.get("/", authenticateJWT, async (request, response, next) => {
             id: user._id,
             username: user.username,
             email: user.email,
-            location: user.location,
-            bio: user.bio
+            location: user.location || "" ,
+            bio: user.bio || ""
         });
     } catch (error) {
         console.error("Error retrieving user: ", error);
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 module.exports = router;

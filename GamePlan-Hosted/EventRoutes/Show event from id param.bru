@@ -1,13 +1,17 @@
 meta {
-  name: Show all public events
+  name: Show event from id param
   type: http
-  seq: 6
+  seq: 2
 }
 
 get {
-  url: http://gameplan-backend.onrender.com/events
+  url: https://gameplan-backend.onrender.com//events/66b2ccac5e3d219768525753
   body: none
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: TokenPlaceholder
 }
 
 body:json {

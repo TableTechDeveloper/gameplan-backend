@@ -39,7 +39,8 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
                 playtime: gameDetails.playtime,
                 description: gameDetails.description,
                 thumbnail: gameDetails.thumbnail,
-                image: gameDetails.image
+                image: gameDetails.image,
+                url: `https://boardgamegeek.com/boardgame/${gameId}`
             });
             await game.save();
         }
@@ -59,11 +60,11 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
         user.gamesOwned.push(game._id);
         await user.save();
 
-        sendSuccessResponse(response, 200, "Game added to collection successfully");
+        sendSuccessResponse(response, 200, `${game.name} added to collection successfully`);
     } catch (error) {
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 /**
  * Route to GET (search for) games.
