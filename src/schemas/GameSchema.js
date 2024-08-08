@@ -16,27 +16,31 @@ const GameSchema = new mongoose.Schema({
     },
     minplayers: {
         type: Number,
-        required: false
+        required: true
     },
     maxplayers: {
         type: Number,
-        required: false
+        required: true
     },
     playtime: {
         type: Number,
-        required: false
+        required: true
     },
     description: {
         type: String,
-        required: false
+        required: true
     },
     thumbnail: {
         type: String,
-        required: false
+        required: true
     },
     image: {
         type: String,
-        required: false
+        required: true
+    },
+    url: {
+        type: String,
+        required: true
     }
 });
 

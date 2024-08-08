@@ -294,6 +294,6 @@ router.get("/", async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-});  // SCRIPTED // TESTED // PASSED
+});
 
 module.exports = router;

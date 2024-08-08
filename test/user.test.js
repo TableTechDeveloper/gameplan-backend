@@ -63,6 +63,28 @@ describe('Users', () => {
             expect(res.body.user).toHaveProperty('email', user.email);
             expect(res.body.user).toHaveProperty('username', user.username);
         });
+
+        // User registration with duplicate email test
+        it('it should not register a user with a duplicate email', async () => {
+            const user = {
+                email: 'testuser@example.com',
+                password: 'Test@1234',
+                username: 'testuser2',
+                securityQuestionOne: 'car',
+                securityQuestionTwo: 'blue',
+                securityQuestionThree: 'dog'
+            };
+
+            const res = await request(app)
+            .post('/user/register')
+            .send(user);
+
+            // The response status should be 400
+            expect(res.status).toBe(400);
+
+            // The response body should contain an error message
+            expect(res.body).toHaveProperty('error', 'Duplicate key error');
+        });
     });
 
     // USER LOGIN
@@ -83,6 +105,20 @@ describe('Users', () => {
             // The response body should contain a JWT token
             expect(res.body).toHaveProperty('jwt');
         });
+
+        // Incorrect login credentials test
+        it('it should not login with incorrect credentials', async () => {
+            // Send a POST request to /user/login
+            const res = await request(app)
+            .post('/user/login')
+            .send({ username: 'testuser', password: 'WrongPassword' });
+
+            // The response status should be 401
+            expect(res.status).toBe(401);
+
+            // The response body should contain an error message
+            expect(res.body).toHaveProperty('message', 'Incorrect password');
+        });
     });
 
     // RETRIEVE USER INFORMATION
@@ -100,6 +136,17 @@ describe('Users', () => {
             // The response body should contain the user's email and username
             expect(res.body).toHaveProperty('email', 'testuser@example.com');
             expect(res.body).toHaveProperty('username', 'testuser');
+        });
+
+        // Unauthorized request test
+        it('it should not retrieve user information without a JWT', async () => {
+            const res = await request(app).get('/user');
+
+            // The response status should be 401
+            expect(res.status).toBe(401);
+
+            // The response body should contain an error message
+            expect(res.body).toHaveProperty('message', 'Access Denied. No Authorization header provided');
         });
     });
 
@@ -125,11 +172,29 @@ describe('Users', () => {
             expect(res.body.updatedUser).toHaveProperty('username', 'updatedUser');
             expect(res.body.updatedUser).toHaveProperty('location', 'New Location');
         });
+
+        // Unauthorized update attempt test
+        it('it should not update user details without a JWT', async () => {
+            const updatedDetails = {
+                username: 'updatedUser',
+                location: 'New Location'
+            };
+
+            const res = await request(app)
+            .patch('/user/update')
+            .send(updatedDetails);
+
+            // The response status should be 401
+            expect(res.status).toBe(401);
+
+            // The response body should contain an error message
+            expect(res.body).toHaveProperty('message', 'Access Denied. No Authorization header provided');
+        });
     });
 
     // DELETE USER
     describe('/DELETE user', () => {
-    // Deleting a user test
+        // Deleting a user test
         it('it should delete the user', async () => {
             // Send a DELETE request to /user
             const res = await request(app)
@@ -146,22 +211,68 @@ describe('Users', () => {
             const user = await User.findOne({ email: 'testuser@example.com' });
             expect(user).toBeNull();
         });
-    });
 
-    // INCORRECT LOGIN
-    describe('/POST login with incorrect credentials', () => {
-        // Incorrect login credentials test
-        it('it should not login with incorrect credentials', async () => {
-            // Send a POST request to /user/login
-            const res = await request(app)
-            .post('/user/login')
-            .send({ username: 'testuser', password: 'WrongPassword' });
+        // Unauthorized delete attempt test
+        it('it should not delete the user without a JWT', async () => {
+            const res = await request(app).delete('/user');
 
             // The response status should be 401
             expect(res.status).toBe(401);
 
             // The response body should contain an error message
-            expect(res.body).toHaveProperty('message', 'Incorrect password');
+            expect(res.body).toHaveProperty('message', 'Access Denied. No Authorization header provided');
         });
     });
+
+    // PASSWORD RESET
+    describe('/POST password-reset', () => {
+        // Successful password reset test
+        it('it should reset the user password', async () => {
+            const resetDetails = {
+                email: 'testuser@example.com',
+                securityQuestionOne: 'car',
+                securityQuestionTwo: 'blue',
+                securityQuestionThree: 'dog',
+                password: 'NewTest@1234'
+            };
+
+            const res = await request(app)
+            .post('/user/password-reset')
+            .send(resetDetails);
+
+            // The response status should be 200
+            expect(res.status).toBe(200);
+
+            // The response body should contain a success message
+            expect(res.body).toHaveProperty('message', 'Password reset successfully');
+
+            // Verify that the user can log in with the new password
+            const loginRes = await request(app)
+            .post('/user/login')
+            .send({ username: 'testuser', password: 'NewTest@1234' });
+
+            expect(loginRes.status).toBe(200);
+            expect(loginRes.body).toHaveProperty('message', 'testuser has logged in!');
+        });
+
+        // Incorrect security questions test
+        it('it should not reset password with incorrect security questions', async () => {
+            const resetDetails = {
+                email: 'testuser@example.com',
+                securityQuestionOne: 'wrong',
+                securityQuestionTwo: 'blue',
+                securityQuestionThree: 'dog',
+                password: 'NewTest@1234'
+            };
+
+            const res = await request(app)
+            .post('/user/password-reset')
+            .send(resetDetails);
+
+            // The response status should be 401
+            expect(res.status).toBe(401);
+            // The response body should contain an error message
+            expect(res.body).toHaveProperty('message', 'Incorrect security details provided');
+        });
+    })
 });

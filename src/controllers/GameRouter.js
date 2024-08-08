@@ -39,7 +39,8 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
                 playtime: gameDetails.playtime,
                 description: gameDetails.description,
                 thumbnail: gameDetails.thumbnail,
-                image: gameDetails.image
+                image: gameDetails.image,
+                url: `https://boardgamegeek.com/boardgame/${gameId}`
             });
             await game.save();
         }
@@ -63,7 +64,7 @@ router.post("/add", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); // SCRIPTED // TESTED // PASSED
+});
 
 /**
  * Route to GET (search for) games.
