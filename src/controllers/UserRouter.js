@@ -185,7 +185,7 @@ router.get("/collection", authenticateJWT, async (request, response, next) => {
         console.error("Error retrieving games:", error);
         next(error);
     }
-});
+}); //JEST TESTED
 
 /**
  * Route to PATCH (update) an existing user's details.
@@ -301,7 +301,7 @@ router.delete("/collection/:id", authenticateJWT, async (request, response, next
         console.error("Error removing game from collection:", error);
         next(error);
     }
-});
+}); // JEST TESTED
 
 /**
  * Route to DELETE the current logged-in user.

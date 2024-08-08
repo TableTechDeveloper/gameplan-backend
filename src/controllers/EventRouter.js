@@ -26,16 +26,17 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
             isPublished 
         } = request.body;
 
-        const user = await User.findById(userId).exec();
-        // User can only add game to event if they own it first
-        if (!user.gamesOwned.includes(game)) {
-            return sendErrorResponse(response, 400, "Game not owned", ["You can only host events with games you own"]);
-        }
         // Find game in db
         const gameDetails = await Game.findById(game).exec();
         if (!gameDetails) {
             return sendErrorResponse(response, 400, "Game not found", ["The specified game does not exist"]);
         }
+        const user = await User.findById(userId).exec();
+        // User can only add game to event if they own it first
+        if (!user.gamesOwned.includes(game)) {
+            return sendErrorResponse(response, 400, "Game not owned", ["You can only host events with games you own"]);
+        }
+
         // if the event is published, then ensure the title, eventDate and location have been captured
         if (isPublished && (!title || !eventDate || !location)) {
             return sendErrorResponse(response, 400, "Missing required fields for published event", ["Title, event date, location, min participants, max participants, and game length are required when publishing an event"]);
@@ -67,7 +68,7 @@ router.post("/new", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 /**
  * Route to POST a user registering their attendance to an event.
@@ -295,6 +296,6 @@ router.get("/", async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-});
+}); // JEST TESTED
 
 module.exports = router;
