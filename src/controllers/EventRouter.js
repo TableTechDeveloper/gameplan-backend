@@ -117,7 +117,7 @@ router.post("/:id/register", authenticateJWT, async (request, response, next) =>
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 /**
  * Route to GET and display an event when given an ID.
@@ -146,7 +146,7 @@ router.get("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 /**
  * Route to PATCH (edit) an event.
@@ -171,23 +171,14 @@ router.patch("/:id", authenticateJWT, async (request, response, next) => {
 
         // Check for required fields if the event is being published
         if (updatedEventDetails.isPublished && !event.isPublished) {
-            const { title, eventDate, location, maxParticipants, gamelength } = updatedEventDetails;
+            const { title, eventDate, location } = updatedEventDetails;
 
             // Check if any of the required fields are missing in the request body
-            if (!title && !event.title) {
-                return sendErrorResponse(response, 400, "Missing required fields for published event", ["Title is required when publishing an event"]);
-            }
             if (!eventDate) {
-                return sendErrorResponse(response, 400, "Missing required fields for published event", ["Event date is required when publishing an event"]);
+                return sendErrorResponse(response, 400, "Missing required event date for published event", ["Event date is required when publishing an event"]);
             }
             if (!location && !event.location) {
-                return sendErrorResponse(response, 400, "Missing required fields for published event", ["Location is required when publishing an event"]);
-            }
-            if (!maxParticipants && !event.maxParticipants) {
-                return sendErrorResponse(response, 400, "Missing required fields for published event", ["Max participants is required when publishing an event"]);
-            }
-            if (!gamelength && !event.gamelength) {
-                return sendErrorResponse(response, 400, "Missing required fields for published event", ["Game length is required when publishing an event"]);
+                return sendErrorResponse(response, 400, "Missing required location for published event", ["Location is required when publishing an event"]);
             }
         }
 
@@ -205,7 +196,7 @@ router.patch("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 /**
  * Route to DELETE a user attending an event they are participating in.
@@ -238,11 +229,6 @@ router.delete("/:id/leave", authenticateJWT, async (request, response, next) => 
         user.eventsAttending.pull(eventId);
         await user.save();
 
-        // Remove the user from the event participants
-        if (!event.participants.includes(userId)) {
-            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
-        }
-
         event.participants.pull(userId);
         await event.save();
 
@@ -250,7 +236,7 @@ router.delete("/:id/leave", authenticateJWT, async (request, response, next) => 
     } catch (error) {
         next(error);
     }
-});
+}); // JEST TESTED
 
 /**
  * Route to DELETE an event.
@@ -278,7 +264,7 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 // CATCH-ALL
 

@@ -1,6 +1,7 @@
 # GamePlan
 
 GamePlan is an event hosting and planning tool that allows users to add boardgames they own to a collection, host events, and join events that others are hosting.
+![Node.js CI](https://github.com/yourusername/gameplan-backend/workflows/Node.js%20CI/badge.svg)
 
 ## Table of Contents
 
