@@ -174,6 +174,27 @@ describe("EventRouter", () => {
 
     });
 
+    describe("GET /user/events", () => {
+        it("should show all events the user is attending", async() => {
+            const response = await request(app).get("/user/events")
+            .set("Authorization", `Bearer ${token}`)
+
+            expect(response.status).toBe(200)
+            expect(response.body).toHaveProperty("message", "Events retrieved successfully")
+        });
+
+        it("should show all events the user is hosting", async() => {
+            const response = await request(app).get("/user/events")
+            .set("Authorization", `Bearer ${token}`)
+            .query({
+                isHosted: "true"
+            })
+
+            expect(response.status).toBe(200)
+            expect(response.body).toHaveProperty("message", "Events retrieved successfully")
+        });
+    })
+
     describe("GET /events/:id", () => {
         it("should provide the user the event details", async () => {
             const user = await User.findOne({ username: "EventUser" }).exec();
@@ -347,5 +368,95 @@ describe("EventRouter", () => {
             expect(response.status).toBe(400)
             expect(response.body).toHaveProperty("message", "Missing required event date for published event")
         });
+    })
+
+    describe("DELETE /events/:id/leave", () => {
+        it("should allow a user to leave an event", async () => {
+            const user = await User.findOne({ username: "OtherUser" }).exec();
+            const event = await Event.findOne({ host: {$ne: user._id}, isPublished: true }).exec();
+
+            const response = await request(app).delete(`/events/${event._id}/leave`)
+            .set("Authorization", `Bearer ${otherUserToken}`)
+
+            expect(response.status).toBe(200)
+            expect(response.body).toHaveProperty("message", "You have successfully left the Test published event event");
+        });
+
+        it("should error if ther user is not logged in", async () => {
+            const user = await User.findOne({ username: "OtherUser" }).exec();
+            const event = await Event.findOne({ host: {$ne: user._id}, isPublished: true }).exec();
+
+            const response = await request(app).delete(`/events/${event._id}/leave`)
+            .set("Authorization", `Bearer ${badToken}`)
+
+            expect(response.status).toBe(404)
+            expect(response.body).toHaveProperty("message", "User not found");
+        });
+
+        it("should error if the event is not found", async () => {
+            const user = await User.findOne({ username: "OtherUser" }).exec();
+
+            const response = await request(app).delete(`/events/${user._id}/leave`)
+            .set("Authorization", `Bearer ${otherUserToken}`)
+
+            expect(response.status).toBe(404)
+            expect(response.body).toHaveProperty("message", "Event not found");
+        });
+
+        it("should error if the user is not attending the event", async () => {
+            const user = await User.findOne({ username: "OtherUser" }).exec();
+            const event = await Event.findOne({ host: {$ne: user._id}, isPublished: true }).exec();
+
+            const response = await request(app).delete(`/events/${event._id}/leave`)
+            .set("Authorization", `Bearer ${otherUserToken}`)
+
+            expect(response.status).toBe(400)
+            expect(response.body).toHaveProperty("message", "User not going to the event");
+        });
+
+        it("should error if the host attempts to leave the event", async () => {
+            const user = await User.findOne({ username: "EventUser" }).exec();
+            const event = await Event.findOne({ host: user._id, isPublished: true }).exec();
+
+            const response = await request(app).delete(`/events/${event._id}/leave`)
+            .set("Authorization", `Bearer ${token}`)
+
+            expect(response.status).toBe(418)
+            expect(response.body).toHaveProperty("message", "You are the host! You cannot leave!");
+        });
+    });
+
+    describe("DELETE /events/:id", () => {
+        it("should error if the event does not exist", async() => {
+            const user = await User.findOne({ username: "OtherUser" }).exec();
+
+            const response = await request(app).delete(`/events/${user._id}`)
+            .set("Authorization", `Bearer ${token}`)
+
+            expect(response.status).toBe(404)
+            expect(response.body).toHaveProperty("message", "Event not found");
+        });
+
+        it("should error if it is not the host trying to delete", async() => {
+            const user = await User.findOne({ username: "EventUser" }).exec();
+            const event = await Event.findOne({ host: user._id }).exec();
+
+            const response = await request(app).delete(`/events/${event._id}`)
+            .set("Authorization", `Bearer ${otherUserToken}`)
+
+            expect(response.status).toBe(403)
+            expect(response.body).toHaveProperty("message", "Only the host may perform this action");
+        });
+
+        it("should remove the event from all users and delete the event from db", async() => {
+            const user = await User.findOne({ username: "EventUser" }).exec();
+            const event = await Event.findOne({ host: user._id }).exec();
+
+            const response = await request(app).delete(`/events/${event._id}`)
+            .set("Authorization", `Bearer ${token}`)
+
+            expect(response.status).toBe(200)
+            expect(response.body).toHaveProperty("message", "Event deleted successfully");
+        })
     })
 })

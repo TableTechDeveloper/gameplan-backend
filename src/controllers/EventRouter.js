@@ -229,11 +229,6 @@ router.delete("/:id/leave", authenticateJWT, async (request, response, next) => 
         user.eventsAttending.pull(eventId);
         await user.save();
 
-        // Remove the user from the event participants
-        if (!event.participants.includes(userId)) {
-            return sendErrorResponse(response, 400, "User not going to the event", ["You are not listed as attending this event!"]);
-        }
-
         event.participants.pull(userId);
         await event.save();
 
@@ -241,7 +236,7 @@ router.delete("/:id/leave", authenticateJWT, async (request, response, next) => 
     } catch (error) {
         next(error);
     }
-});
+}); // JEST TESTED
 
 /**
  * Route to DELETE an event.
@@ -269,7 +264,7 @@ router.delete("/:id", authenticateJWT, async (request, response, next) => {
     } catch (error) {
         next(error);
     }
-}); 
+}); // JEST TESTED
 
 // CATCH-ALL
 
