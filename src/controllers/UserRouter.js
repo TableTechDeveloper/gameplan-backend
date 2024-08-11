@@ -84,7 +84,7 @@ router.post("/login", async (request, response  , next) => {
  * Route to POST (request) a password reset.
  * Provides Security Question challenges
  */
-router.post('/password-reset', async (request, response, next) => {
+router.post("/password-reset", async (request, response, next) => {
     let { email, securityQuestionOne, securityQuestionTwo, securityQuestionThree, password } = request.body;
 
     if (securityQuestionOne) securityQuestionOne = securityQuestionOne.toLowerCase();
@@ -228,18 +228,18 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
 //  * Route to POST (reset) password using a token.
 //  * Removed route as now being handled with security questions.
 //  */
-// router.post('/reset/:token', async (request, response, next) => {
+// router.post("/reset/:token", async (request, response, next) => {
 //     try {
 //         const { token } = request.params;
 //         const { newPassword } = request.body;
 
 //         // Check if new password is provided and valid
 //         if (!newPassword) {
-//             return sendErrorResponse(response, 400, 'New password is required', ['Please provide a new password.']);
+//             return sendErrorResponse(response, 400, "New password is required", ["Please provide a new password."]);
 //         }
 
 //         if (!validatePassword(newPassword)) {
-//             return sendErrorResponse(response, 400, 'Invalid password format', ['Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.']);
+//             return sendErrorResponse(response, 400, "Invalid password format", ["Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character."]);
 //         }
 
 //         // Find the user by the reset token and check if the token has not expired
@@ -249,7 +249,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
 //         }).exec();
 
 //         if (!user) {
-//             return sendErrorResponse(response, 400, 'Invalid or expired token', ['The password reset token is invalid or has expired.']);
+//             return sendErrorResponse(response, 400, "Invalid or expired token", ["The password reset token is invalid or has expired."]);
 //         }
 
 //         // Update the user's password and clear the reset token and expiry
@@ -259,7 +259,7 @@ router.patch("/update", authenticateJWT, async (request, response, next) => {
 
 //         await user.save();
 
-//         sendSuccessResponse(response, 200, 'Password has been reset successfully', {});
+//         sendSuccessResponse(response, 200, "Password has been reset successfully", {});
 //     } catch (error) {
 //         next(error);
 //     }

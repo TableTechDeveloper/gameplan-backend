@@ -8,10 +8,15 @@ const app = express();
 
 app.use(
   cors({
-    // origin: `https://gameplan-deploy1.netlify.app`,
-    origin: `*`,
+    origin: [
+      "https://gameplan.social", 
+      "https://www.gameplan.social", 
+      "http://gameplan.social", 
+      "http://www.gameplan.social", 
+      "https://tabletech-gameplan.netlify.app/"
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 app.use(express.json());

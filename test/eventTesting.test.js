@@ -73,7 +73,7 @@ describe("EventRouter", () => {
         it("should create a new public draft event", async () => {
             // Add game to user collection
             const game = { gameId: "31481" }
-            const addedGame  = await request(app).post('/games/add')
+            const addedGame  = await request(app).post("/games/add")
             .set("Authorization", `Bearer ${token}`)
             .send(game);
 
@@ -131,7 +131,7 @@ describe("EventRouter", () => {
 
         it("should return an error if the host does not own the game for the event", async () => {
             const game = { gameId: "179172" }
-            const notOwnedGame = await request(app).post('/games/add')
+            const notOwnedGame = await request(app).post("/games/add")
             .set("Authorization", `Bearer ${otherUserToken}`)
             .send(game);
 
