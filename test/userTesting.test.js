@@ -56,7 +56,7 @@ afterAll(async() => {
     await mongoose.connection.close();
 })
 
-describe('UserRouter', () => {
+describe("UserRouter", () => {
     describe("POST /user/register", () => {
         it("should register a new user", async () => {
             const user = {
@@ -68,7 +68,7 @@ describe('UserRouter', () => {
                 securityQuestionThree: "Three"
             };
 
-            const response = await request(app).post('/user/register').send(user)
+            const response = await request(app).post("/user/register").send(user)
             secondJesterToken = createJWT(user._id)
 
             expect(response.status).toBe(201)
@@ -93,8 +93,8 @@ describe('UserRouter', () => {
                 securityQuestionThree: "Three"
             }
 
-            await request(app).post('/user/register').send(user) 
-            const response = await request(app).post('/user/register').send(user2) 
+            await request(app).post("/user/register").send(user) 
+            const response = await request(app).post("/user/register").send(user2) 
 
             expect(response.status).toBe(400)
             expect(response.body).toHaveProperty("message", "This email address or username is already in use!")
@@ -110,7 +110,7 @@ describe('UserRouter', () => {
                 securityQuestionThree: "Three"
             };
 
-            const response = await request(app).post('/user/register').send(user);
+            const response = await request(app).post("/user/register").send(user);
 
             expect(response.status).toBe(400);
             expect(response.body).toHaveProperty("message", "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.")
@@ -125,7 +125,7 @@ describe('UserRouter', () => {
                 password: "Test@1234"
             };
 
-            const response = await request(app).post('/user/login').send(user)
+            const response = await request(app).post("/user/login").send(user)
 
             expect(response.status).toBe(200)
             expect(response.body).toHaveProperty("message", "Jester has logged in!")
@@ -134,7 +134,7 @@ describe('UserRouter', () => {
         it("should provide error is username is missing", async () => {
             const user = {};
 
-            const response = await request(app).post('/user/login').send(user)
+            const response = await request(app).post("/user/login").send(user)
 
             expect(response.status).toBe(400)
             expect(response.body).toHaveProperty("message", "Missing login details")
@@ -146,7 +146,7 @@ describe('UserRouter', () => {
                 password: "RazzleDazzle"
             };
 
-            const response = await request(app).post('/user/login').send(user)
+            const response = await request(app).post("/user/login").send(user)
 
             expect(response.status).toBe(404)
             expect(response.body).toHaveProperty("message", "User not found")
@@ -158,7 +158,7 @@ describe('UserRouter', () => {
                 password: "OppsieDoodle"
             };
 
-            const response = await request(app).post('/user/login').send(user)
+            const response = await request(app).post("/user/login").send(user)
 
             expect(response.status).toBe(401)
             expect(response.body).toHaveProperty("message", "Incorrect password")
@@ -175,7 +175,7 @@ describe('UserRouter', () => {
                 password: "New@12345"
             };
 
-            const response = await request(app).post('/user/password-reset').send(user)
+            const response = await request(app).post("/user/password-reset").send(user)
 
             expect(response.status).toBe(200)
             expect(response.body).toHaveProperty("message", "Password reset successfully")
@@ -190,7 +190,7 @@ describe('UserRouter', () => {
                 password: "New@12345"
             };
 
-            const response = await request(app).post('/user/password-reset').send(user)
+            const response = await request(app).post("/user/password-reset").send(user)
 
             expect(response.status).toBe(404)
             expect(response.body).toHaveProperty("message", "User not found")
@@ -205,7 +205,7 @@ describe('UserRouter', () => {
                 password: "New@12345"
             };
 
-            const response = await request(app).post('/user/password-reset').send(user)
+            const response = await request(app).post("/user/password-reset").send(user)
 
             expect(response.status).toBe(401)
             expect(response.body).toHaveProperty("message", "Incorrect security details provided")
@@ -220,7 +220,7 @@ describe('UserRouter', () => {
                 password: "New12345"
             };
 
-            const response = await request(app).post('/user/password-reset').send(user)
+            const response = await request(app).post("/user/password-reset").send(user)
 
             expect(response.status).toBe(400)
             expect(response.body).toHaveProperty("message", "Password must be between 8-16 characters and include an uppercase letter, lowercase letter, number, and special character.")
@@ -234,7 +234,7 @@ describe('UserRouter', () => {
                 bio: "Beep boop, I am a robot"
             };
 
-            const response = await request(app).patch('/user/update')
+            const response = await request(app).patch("/user/update")
             .set("Authorization", `Bearer ${token}`)
             .send(user)
 
@@ -247,7 +247,7 @@ describe('UserRouter', () => {
                 password: "In the computer",
             };
 
-            const response = await request(app).patch('/user/update')
+            const response = await request(app).patch("/user/update")
             .set("Authorization", `Bearer ${token}`)
             .send(user)
 
@@ -260,7 +260,7 @@ describe('UserRouter', () => {
                 password: "Update@1234",
             };
 
-            const response = await request(app).patch('/user/update')
+            const response = await request(app).patch("/user/update")
             .set("Authorization", `Bearer ${badToken}`) // got an old token from a few tests ago
             .send(user)
 
@@ -269,9 +269,9 @@ describe('UserRouter', () => {
         });
     });
 
-    describe('GET /user/', () => {
+    describe("GET /user/", () => {
         it("should show the users details", async () => {
-            const response = await request(app).get('/user/')
+            const response = await request(app).get("/user/")
             .set("Authorization", `Bearer ${token}`)
             .send(user)
 
@@ -280,7 +280,7 @@ describe('UserRouter', () => {
         });
 
         it("should return an error if no user exists", async () => {
-            const response = await request(app).get('/user/')
+            const response = await request(app).get("/user/")
             .set("Authorization", `Bearer ${badToken}`)
             .send(user)
 
@@ -289,9 +289,9 @@ describe('UserRouter', () => {
         });
     });
 
-    describe('DELETE /user/', () => {
+    describe("DELETE /user/", () => {
         it("should delete the user", async () => {
-            const response = await request(app).delete('/user/')
+            const response = await request(app).delete("/user/")
             .set("Authorization", `Bearer ${deletedUserToken}`)
             .send(user)
 
@@ -300,7 +300,7 @@ describe('UserRouter', () => {
         });
 
         it("should return an error if no user exists", async () => {
-            const response = await request(app).delete('/user/')
+            const response = await request(app).delete("/user/")
             .set("Authorization", `Bearer ${badToken}`)
             .send(user)
 
@@ -330,7 +330,7 @@ describe('UserRouter', () => {
         });
 
         it("should error when user is not authenticated", async () => {
-            const response = await request(app).get('/user/collection')
+            const response = await request(app).get("/user/collection")
             .set("Authorization", `Bearer ${badToken}`)
 
             expect(response.status).toBe(404)
