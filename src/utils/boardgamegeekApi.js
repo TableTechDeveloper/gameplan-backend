@@ -52,6 +52,7 @@ async function searchForSingleGame(name) {
     try {
         // Make an HTTP GET request to search for the game by name with exact matching
         const response = await axios.get("https://boardgamegeek.com/xmlapi/search?search=" + name + "&exact=1");
+        console.log(response)
         const parsedData = await xml2js.parseStringPromise(response.data);
         const boardgamedata = parsedData.boardgames.boardgame[0];
         // Extract and log the object ID of the board game

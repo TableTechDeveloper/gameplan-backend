@@ -13,7 +13,8 @@ app.use(
       "https://www.gameplan.social", 
       "http://gameplan.social", 
       "http://www.gameplan.social", 
-      "https://tabletech-gameplan.netlify.app/"
+      "https://tabletech-gameplan.netlify.app/",
+      "http://localhost:3001"
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
